@@ -18,7 +18,10 @@ token_patterns = [
     ('NUMBER', r'\d+(\.\d*)?'),
     ('VARIABLE', r'[a-zA-Z][a-zA-Z0-9]*=?'),
     # ('OPERATOR', r'[+\-*/^%=]'),
+
     ('ADD', r'\+'),
+    ('MINUS', r'\-d'),
+
     ('SUB', r'\-'),
     ('MUL', r'\*'),
     ('DIV', r'/'),
@@ -49,23 +52,18 @@ def test_color():
     print_color("UNDERLINE", "Hello, World!")
     print_color("ENDC", "Hello, World!")
 
-def print_color(stdscr, color, text):
-    return
-    stdscr.addstr(COLORS[color] + text + COLORS["ENDC"])
+def print_color(color, text):
+    print(COLORS[color] + text + COLORS["ENDC"])
 
 # ----------------- Lexer -----------------
-
-def lexer(stdscr, input_string, DEBUG=False):
+def lexer(input_string, DEBUG=False):
     input_string = input_string.strip()
-    DEBUG and stdscr.addstr("\n | Input Lexer: " + input_string)
+
+    DEBUG and print_color("WARNING", "\n | Input Lexer: " + input_string)
 
     if not input_string:
-        stdscr.addstr("WARNING - Lexer: Empty input")
+        DEBUG and print_color("WARNING" ," | Lexer: Empty input")
 
-    if not input_string:
-        stdscr.addstr("WARNING - Lexer: Empty input")
-
-    DEBUG and stdscr.addstr("\n | Token Patterns: " + str(token_patterns))
     
     # Compile regex pattern
     token_regex = '|'.join('(?P<%s>%s)' % pair for pair in token_patterns) 
@@ -79,10 +77,10 @@ def lexer(stdscr, input_string, DEBUG=False):
         try:
             match = token_re.match(input_string, pos)
             if not match:
-                stdscr.addstr("FAIL - Lexer: Unexpected character found: " + input_string[pos], "\n")
+                print_color("WARNING"," | Lexer: Unexpected character found: " + input_string[pos], "\n")
                 return []
         except ValueError as e:
-            print_color(stdscr , "FAIL", f"Error: {e}\n")
+            print_color("WARNING", f"Error: {e}\n")
             not DEBUG and exit(1)
             return []
             
@@ -93,7 +91,7 @@ def lexer(stdscr, input_string, DEBUG=False):
             tokens.append((token_type, token_value))
         pos = match.end()
     
-    DEBUG and print_color(stdscr, "WARNING", "Tokens: " + COLORS["RESET"] + COLORS["UNDERLINE"]+ str(tokens))
+    DEBUG and print_color("WARNING", " | Tokens: " + COLORS["UNDERLINE"]+ str(tokens))
     return tokens
 
 # ----------------- Test main -----------------
