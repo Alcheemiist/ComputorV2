@@ -10,10 +10,7 @@ history = []
 history_index = -1
 current_input = ""
 cursor_position = 0
-
-def display_result(stdscr, result):
-    return 
-    stdscr.addstr(f" = {result}\n")
+context = {}  # Store variables and functions
 
 def display_calculator(stdscr):
     stdscr.clear()
@@ -30,26 +27,31 @@ def evaluate_expression(expression):
     except Exception as e:
         return f"Error: {e}"
 
-def computorv2(stdscr, user_input=None):
-    context = {}  # Store variables and functions
+def computorv2(stdscr, user_input="", DEBUG=False):
+    global context
 
     if user_input == "all":
-        for key, value in context.items():
-            print(f"{key} = {value}")
+        stdscr.addstr("\nAll variables and functions:")
+        if context:
+            for key, value in context.items():
+                stdscr.addstr(f"\n > {key} = {value}")
+        else:
+            stdscr.addstr(" None")
+        return  "all"
+
+    try:
+        tokens = lexer(stdscr, user_input, DEBUG)
+        stdscr.addstr("\n | Tokens: " + str(tokens) + "\n")
+        ast = parser(tokens)
+        context, result = evaluator(ast, context, DEBUG)
+
+        stdscr.addstr("\n | context: " + str(context) + "\n")
+        stdscr.addstr("\n | AST: " + str(ast) + "\n")
+
+        return  result
     
-    # try:
-    #     DEBUG and print("Input:", user_input)
-    #     tokens = lexer(user_input, DEBUG)
-    #     ast = parser(tokens)
-    #     context, result = evaluator(ast, context, DEBUG)
-
-    #     DEBUG and print(COLORS["OKBLUE"] + COLORS["UNDERLINE"],f"> Result : {result}", COLORS["ENDC"])
-    #     not DEBUG and print(COLORS["BOLD"] + COLORS["UNDERLINE"], f"> Result : {result}", COLORS["ENDC"])
-    #     # history.append((user_input, result))
-
-
-    # except Exception as e:
-    #     print(f"Main Error: {e}")
+    except Exception as e:
+        print(f"Main Error: {e}")
 
 def main(stdscr):
     global history_index, current_input, cursor_position
@@ -59,12 +61,15 @@ def main(stdscr):
     DEBUG and test_color()
     
     curses.curs_set(1)  # Show the cursor
-    stdscr.nodelay(0)   # Block while waiting for user input
+    stdscr.nodelay(1)   # Block while waiting for user input
 
     while True:
         key = stdscr.getch()
+
         if key == ord('q'):  # Exit the program
             break
+        elif key == ord('a'):  # Print all variables and functions
+            computorv2(stdscr, "all")
         elif key == curses.KEY_UP:  # Up arrow key (history backward)
             if history_index > 0:
                 history_index -= 1
@@ -98,18 +103,19 @@ def main(stdscr):
                 current_input = current_input[:cursor_position] + current_input[cursor_position + 1:]
             display_calculator(stdscr)
         elif key == curses.KEY_ENTER or key == 10:  # Enter (evaluate expression)
+            stdscr.addstr(f"\n\n | Input = '{current_input}'\n")
             if current_input:
                 result = evaluate_expression(current_input)
-                stdscr.addstr(f"\n | eva = {result}\n")
+                stdscr.addstr(f"\n | result eval = {result}\n")
 
-                result = computorv2(stdscr)
-                stdscr.addstr(f" | cv2 = {result}\n")
+                result = computorv2(stdscr,current_input, DEBUG)
+
+                stdscr.addstr(f" | result cv2 = {result}\n")
 
                 history.append(current_input)
                 history_index = len(history)
                 current_input = ""
                 cursor_position = 0
-                display_result(stdscr, result)
             else :
                 display_calculator(stdscr)    
         else:

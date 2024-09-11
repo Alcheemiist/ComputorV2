@@ -49,16 +49,23 @@ def test_color():
     print_color("UNDERLINE", "Hello, World!")
     print_color("ENDC", "Hello, World!")
 
-def print_color(color, text):
-    print(COLORS[color] + text + COLORS["ENDC"])
+def print_color(stdscr, color, text):
+    return
+    stdscr.addstr(COLORS[color] + text + COLORS["ENDC"])
 
 # ----------------- Lexer -----------------
 
-def lexer(input_string, DEBUG=False):
+def lexer(stdscr, input_string, DEBUG=False):
     input_string = input_string.strip()
+    DEBUG and stdscr.addstr("\n | Input Lexer: " + input_string)
+
     if not input_string:
-        print_color("WARNING", "Lexer: Empty input")
-    DEBUG and print_color("WARNING", "Lexer input : " + COLORS["ENDC"] + input_string)
+        stdscr.addstr("WARNING - Lexer: Empty input")
+
+    if not input_string:
+        stdscr.addstr("WARNING - Lexer: Empty input")
+
+    DEBUG and stdscr.addstr("\n | Token Patterns: " + str(token_patterns))
     
     # Compile regex pattern
     token_regex = '|'.join('(?P<%s>%s)' % pair for pair in token_patterns) 
@@ -72,12 +79,12 @@ def lexer(input_string, DEBUG=False):
         try:
             match = token_re.match(input_string, pos)
             if not match:
-                print_color("FAIL", (("Illegal character: " + input_string[pos])))
-                break
+                stdscr.addstr("FAIL - Lexer: Unexpected character found: " + input_string[pos], "\n")
+                return []
         except ValueError as e:
-            print_color("FAIL", f"Error: {e}\n")
+            print_color(stdscr , "FAIL", f"Error: {e}\n")
             not DEBUG and exit(1)
-            break
+            return []
             
         token_type = match.lastgroup
         token_value = match.group()
@@ -86,7 +93,7 @@ def lexer(input_string, DEBUG=False):
             tokens.append((token_type, token_value))
         pos = match.end()
     
-    DEBUG and print_color("WARNING", "Tokens: " + COLORS["RESET"] + COLORS["UNDERLINE"]+ str(tokens))
+    DEBUG and print_color(stdscr, "WARNING", "Tokens: " + COLORS["RESET"] + COLORS["UNDERLINE"]+ str(tokens))
     return tokens
 
 # ----------------- Test main -----------------
