@@ -72,7 +72,8 @@ def lexer(input_string, DEBUG=False):
         try:
             match = token_re.match(input_string, pos)
             if not match:
-                raise ValueError("Illegal character: " + input_string[pos])
+                print_color("FAIL", (("Illegal character: " + input_string[pos])))
+                break
         except ValueError as e:
             print_color("FAIL", f"Error: {e}\n")
             not DEBUG and exit(1)
