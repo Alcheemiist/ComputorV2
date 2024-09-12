@@ -55,21 +55,16 @@ def parser(tokens):
     def parse_primary():
         if not tokens:
             raise ValueError("Unexpected end of input")
-        
         token = tokens.pop(0)
         if token[0] == 'NUMBER':
             return ASTNode('NUMBER', float(token[1]))
         elif token[0] == 'VARIABLE':
             return ASTNode('VARIABLE', token[1])
+        elif token[0] == 'SUB':
+            return ASTNode('NUMBER', -1 * float(tokens[0][1] ))
         else:
             raise ValueError(f"Unexpected token: {token}")
 
     ast = parse_expression()
     return ast
 
-# Test the parser
-# tokens = [('VARIABLE', 'var2'), ('EQUAL', '='), ('NUMBER', '2'), ('ADD', '+'), ('NUMBER', '1'), ('MUL', '*'), ('NUMBER', '3'), ('SUB', '-'), ('NUMBER', '4'), ('DIV', '/'), ('NUMBER', '2'), ('POW', '^'), ('NUMBER', '2')]
-# test_input = "1 + 1 - x * 3 / 2 ^ 2"
-# tokens = lexer(test_input)
-# ast = parser(tokens)
-# print(ast)

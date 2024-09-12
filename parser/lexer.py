@@ -18,10 +18,7 @@ token_patterns = [
     ('NUMBER', r'\d+(\.\d*)?'),
     ('VARIABLE', r'[a-zA-Z][a-zA-Z0-9]*=?'),
     # ('OPERATOR', r'[+\-*/^%=]'),
-
     ('ADD', r'\+'),
-    ('MINUS', r'\-d'),
-
     ('SUB', r'\-'),
     ('MUL', r'\*'),
     ('DIV', r'/'),
@@ -33,12 +30,12 @@ token_patterns = [
     ('RPAREN', r'\)'),
     ('LBRACKET', r'\['),
     ('RBRACKET', r'\]'),
-    # ('SEMICOLON', r';'),
+    ('SEMICOLON', r';'),
     ('COMMA', r','),
     ('QUESTION', r'\?'),
-    ('IMAGINARY', r'i')
-    # ('FUNCTION', r'[a-zA-Z][a-zA-Z0-9]*\('),
-    # ('MATRIX', r'\[[^\]]*\]'),
+    ('IMAGINARY', r'\d*i'),
+    ('FUNCTION', r'[a-zA-Z][a-zA-Z0-9]*\('),
+    ('MATRIX', r'\[[^\]]*\]')
 ]
 
 def test_color():
@@ -93,8 +90,3 @@ def lexer(input_string, DEBUG=False):
     
     DEBUG and print_color("WARNING", " | Tokens: " + COLORS["UNDERLINE"]+ str(tokens))
     return tokens
-
-# ----------------- Test main -----------------
-if __name__ == "__main__":
-    test_input = " a * s*i + 3.5 / 2 * (14- 1) = 0 * [1, 2, 3] + 4i * 13 ?"
-    lexer(test_input)

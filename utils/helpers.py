@@ -12,21 +12,6 @@ COLORS = {
     "RESET": "\033[0m"
 }
 
-def test_color():
-    print_color("OKGREEN", "Hello, World!")
-    print_color("WARNING", "Hello, World!")
-    print_color("FAIL", "Hello, World!")
-    print_color("HEADER", "Hello, World!")
-    print_color("OKBLUE", "Hello, World!")
-    print_color("OKCYAN", "Hello, World!")
-    print_color("BOLD", "Hello, World!")
-    print_color("UNDERLINE", "Hello, World!")
-    print_color("ENDC", "Hello, World!")
-
-
-def get_user_input():
-    return input(COLORS["OKCYAN"] + "clc> " + COLORS["RESET"])
-
 def print_color(color, text):
     print(COLORS[color] + text + COLORS["ENDC"])
 
