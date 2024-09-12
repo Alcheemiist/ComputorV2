@@ -45,13 +45,19 @@ def parser(tokens):
         return expr
 
     def parse_exponentiation():
-        expr = parse_primary()
+        expr = parse_unary()
         if tokens and tokens[0][0] == 'POW':
             tokens.pop(0)  # Consume '^'
             right = parse_exponentiation()
             return ASTNode('OPERATOR', '^', expr, right)
         return expr
-
+    
+    def parse_unary():
+        if tokens and tokens[0][0] == 'SUB':
+            tokens.pop(0)  # Consume '-'
+            return ASTNode('NUMBER', -1 * parse_unary().value)
+        return parse_primary()
+    
     def parse_primary():
         if not tokens:
             raise ValueError("Unexpected end of input")
@@ -60,8 +66,6 @@ def parser(tokens):
             return ASTNode('NUMBER', float(token[1]))
         elif token[0] == 'VARIABLE':
             return ASTNode('VARIABLE', token[1])
-        elif token[0] == 'SUB':
-            return ASTNode('NUMBER', -1 * float(tokens[0][1] ))
         else:
             raise ValueError(f"Unexpected token: {token}")
 
