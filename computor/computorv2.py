@@ -29,7 +29,9 @@ def computorv2(user_input="", DEBUG=False):
         DEBUG and print_color("HEADER",f" | Context : {context}")
         return result
     except Exception as e:
+        error = f" > Error: {e}"
         print_color("FAIL", f" > Error: {e}")
+        raise
         return None
 
 def main():

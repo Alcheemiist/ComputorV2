@@ -7,12 +7,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from computor.computorv2 import computorv2
 
 class TestComputorv2(unittest.TestCase):
-
-
     def setUp(self):
-
         pass
-
     def  computor(self, user_input):
             return computorv2(user_input, False)
     
@@ -48,7 +44,7 @@ class TestComputorv2(unittest.TestCase):
     
     def test_computation_assignment(self):
         self.assertEqual(self.computor("varA =  2 - 5"), ( 2 - 5))
-        # self.assertEqual(self.computor("varB = 2 * varA - 5 %4"), (53))
+        self.assertEqual(self.computor("varB = 2 * varA - 5 %4"), (2 * (2 - 5) - 5 %4))
 
     def test_basic_arithmetic(self):
         self.assertEqual(self.computor("2 + 3 * 4 - 5 / 2 ?"), 11.5)
