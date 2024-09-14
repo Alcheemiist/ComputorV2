@@ -1,10 +1,9 @@
 import sys
 sys.path.append('..')
-
-from parser.lexer import lexer
-from parser.parser import parser
-from evaluator.evaluator import evaluator
-from utils.helpers import print_color, COLORS
+from lexer import lexer
+from parser import parser
+from evaluator import evaluator
+from helpers import print_color, COLORS
 
 context = {}
 
@@ -30,8 +29,8 @@ def computorv2(user_input="", DEBUG=False):
         return result
     except Exception as e:
         error = f" > Error: {e}"
-        print_color("FAIL", f" > Error: {e}")
-        raise
+        # print_color("FAIL", f" > Error: {e}")
+        raise ValueError(error)
         return None
 
 def main():
