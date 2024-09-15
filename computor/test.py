@@ -33,6 +33,8 @@ class TestComputorv2(unittest.TestCase):
     def  computor(self, user_input):
             return computorv2(user_input, False)
     
+    # ------------------ TESTS ------------------ #
+
     def test_basic_assignment(self):
         self.assertEqual(self.computor("varA = 2"), 2)
         self.assertEqual(self.computor("varB = 4"), 4)
@@ -49,7 +51,7 @@ class TestComputorv2(unittest.TestCase):
         self.assertEqual(self.computor(" 2 / -4"), -0.5)
         self.assertEqual(self.computor(" 2 % -4"), -2)
         self.assertEqual(self.computor(" 2 ^ -4"), 0.0625)
-
+   
     def test_unary_operations(self):
         self.assertEqual(self.computor("2 + -4"), -2)
         self.assertEqual(self.computor("2 - -4"), 6)
@@ -116,25 +118,68 @@ class TestComputorv2(unittest.TestCase):
         self.assertEqual(self.computor("2 * (3 + 4) / 2 + 3 * 2 - 4 / 2 ?"), 11)
         self.assertEqual(self.computor("2 * (3 + 4) / 2 + 3 * 2 - 4 / 2 ^ 2 ?"), 12)
     
-
     def test_complex_assignment(self):
         self.assertEqual(str(self.computor("varD = 2j + 3")), "(3+2j)")
         self.assertEqual(str(self.computor("varE = -4j - 4")), "(-4-4j)")
         pass
-
+    
     def test_matrix_assignment(self):
-        self.assertEqual(str(self.computor("matA = [[2,3];[4,3]]")), "[ 2 , 3 ]\n[ 4 , 3 ]")
-        self.assertEqual(str(self.computor("matB = [[3,4]]")), "[ 3 , 4 ]")
+        self.assertEqual((self.computor("matA = [[2,3];[4,3]]")), [[2,3],[4,3]])
+        self.assertEqual((self.computor("matB = [[3,4]]")), [[3, 4]])
+        self.assertEqual((self.computor("matC = [[2,3,4];[4,3,2];[1,2,3]]")), [[2,3,4],[4,3,2],[1,2,3]])
+      
+    def test_matrix_errors(self):
+        with self.assertRaises(ValueError):
+            self.computor("matA = [[2,3];[4,3];[1,2,5]]")
+        with self.assertRaises(ValueError):
+            self.computor("matA = [[2,3];[4,3]:[1,2]]")
+        with self.assertRaises(ValueError):
+            self.computor("matA = [[2,3];[4,3] + 2]")
+        with self.assertRaises(ValueError):
+            self.computor("matA = [[2,3];[4,3] - 2]")
+
+    def test_matrix_operations(self):
+        self.assertEqual((self.computor("matD = [[2,3,4];[4,3,2];[1,2,3]] + [[2,3,4];[4,3,2];[1,2,3]]")), [[4,6,8],[8,6,4],[2,4,6]])
+        self.assertEqual((self.computor("matE = [[2,3,4];[4,3,2];[1,2,3]] - [[2,3,4];[4,3,2];[1,2,3]]")), [[0,0,0],[0,0,0],[0,0,0]])
+        self.assertEqual((self.computor("matF = [[2,3,4];[4,3,2];[1,2,3]] * [[2,3,4];[4,3,2];[1,2,3]]")), [[20, 23, 26], [22, 25, 28], [13, 15, 17]])
+        self.assertEqual((self.computor("matG = [[2,3,4];[4,3,2];[1,2,3]] / [[2,3,4];[4,3,2];[1,2,3]]")), [[1, 1, 1], [1, 1, 1], [1, 1, 1]])
+        self.assertEqual((self.computor("matH = [[2,3,4];[4,3,2];[1,2,3]] % [[2,3,4];[4,3,2];[1,2,3]]")), [[0, 0, 0], [0, 0, 0], [0, 0, 0]])
+
+    def test_scalar_matrix_operations(self):
+        self.assertEqual((self.computor("matA = [[2,3];[4,3]] + 2")), [[4,5],[6,5]])
+        self.assertEqual((self.computor("matB = [[2,3];[4,3]] - 2")), [[0,1],[2,1]])
+        self.assertEqual((self.computor("matC = [[2,3];[4,3]] * 2")), [[4,6],[8,6]])
+        self.assertEqual((self.computor("matD = [[2,3];[4,3]] / 2")), [[1,1.5],[2,1.5]])
+        self.assertEqual((self.computor("matE = [[2,3];[4,3]] % 2")), [[0,1],[0,1]])
+
+    def test_matrix_operation_errors(self):
+        with self.assertRaises(ValueError):
+            self.computor("matA = [[2,3];[4,3]] + [[2,3,5];[4,3]]")
+        with self.assertRaises(ValueError):
+            self.computor("matA = [[2,3];[4,3]] - [[2,3,5];[4,3]]")
+        with self.assertRaises(ValueError):
+            self.computor("matA = [[2,3];[4,3]] * [[2,3,5];[4,3]]")
+        with self.assertRaises(ValueError):
+            self.computor("matA = [[2,3];[4,3]] / [[2,3,5];[4,3]]")
+        with self.assertRaises(ValueError):
+            self.computor("matA = [[2,3];[4,3]] % [[2,3,5];[4,3]]")
+        with self.assertRaises(ValueError):
+            self.computor("matA = [[2,3];[4,3]] + 2j")
+        with self.assertRaises(ValueError):
+            self.computor("matA = [[2,3];[4,3]] - 2j")
+        with self.assertRaises(ValueError):
+            self.computor("matA = [[2,3];[4,3]] * 2j")
+        with self.assertRaises(ValueError):
+            self.computor("matA = [[2,3];[4,3]] / 2j")
+        with self.assertRaises(ValueError):
+            self.computor("matA = [[2,3];[4,3]] % 2j")
+        with self.assertRaises(ValueError):
+            self.computor("matA = [[2,3];[4,3]] + [2,3]")
 
 
-# NOT IMPLEMENTED YET
-
-
-   
-
-    # def test_function_assignment(self):
-    #     self.assertEqual(str(self.computor("funA(x) = 2*x^5 + 4x^2 - 5*x + 4")), "2 * x^5 + 4 * x^2 - 5*x + 4")
-    #     self.assertEqual(str(self.computor("funB(y) = 43 * y / (4 % 2 * y)")), "43 * y / (4 % 2 * y)")
+    def test_function_assignment(self):
+        self.assertEqual(str(self.computor("funA(x) = 2*x^5 + 4x^2 - 5*x + 4")), "2 * x^5 + 4 * x^2 - 5*x + 4")
+        self.assertEqual(str(self.computor("funB(y) = 43 * y / (4 % 2 * y)")), "43 * y / (4 % 2 * y)")
 
     # def test_matrix_operations(self):
     #     self.computor("matA = [[1,2];[3,4]]")

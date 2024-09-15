@@ -1,18 +1,34 @@
 
 class ASTNode:
-    def __init__(self, type, value=None, left=None, right=None):
+    def __init__(self, type, value=None, left=None, right=None, matrix=None, function=None, func_exp=None):
         self.type = type
         self.value = value
         self.left = left
         self.right = right
 
+        if function:
+            self.function = function
+            self.func_exp = func_exp
+            self.type = 'FUNCTION'
+
+        if matrix:
+            self.value = matrix
+            self.type = 'MATRIX'
+
     def __str__(self):
         if self.type in ('NUMBER', 'VARIABLE'):
             return f"{self.type}({self.value})"
+        elif self.type == 'COMPLEX':
+            return f"COMPLEX({self.value})"
         elif self.type == 'OPERATOR':
             return f"({self.left} {self.value} {self.right})"
         elif self.type == 'ASSIGNMENT':
             return f"ASSIGN({self.left} = {self.right})"
+        elif self.type == 'MATRIX':
+            return f"Matrix({self.value})"
+        elif self.type == 'FUNCTION':
+            return f"Function({self.function}({self.left}))"
+        
         else:
             return f"{self.type}({self.value})"
 
@@ -58,55 +74,77 @@ def parser(tokens):
             right = parse_unary()
             return ASTNode('OPERATOR', '-', ASTNode('NUMBER', 0), right)  # Unary minus as (0 - expr)
         return parse_primary()
-    
-    def parse_matrix():
-        if not tokens:
-            raise ValueError("Unexpected end of input")
-        rows = []
-        print(" | Matrix Tokens : ", tokens)
-        while tokens :
-            tokens.pop(0)
-            row = []
-            while tokens and tokens[0][0] != 'SEMICOLON':
-                if tokens and tokens[0][0] == 'COMMA':
-                    tokens.pop(0)
-                row.append(parse_expression())
-            if tokens and tokens[0][0] == 'SEMICOLON':
-                tokens.pop(0)
-
-            rows.append(row)
-
-            if not tokens or tokens.pop(0)[0] != 'RBRACKET':
-                raise ValueError("Missing closing bracket")
-                
-        print(" | Rows : ", rows)
-        return ASTNode('MATRIX', rows)
 
     def parse_primary():
         if not tokens:
             raise ValueError("Unexpected end of input")
         token = tokens.pop(0)
         if token[0] == 'NUMBER':
-            return ASTNode('NUMBER', float(token[1]))
+
+            number = None
+            if '.' in token[1]:
+                number = float(token[1])
+            else:
+                number = int(token[1])
+            
+            return ASTNode('NUMBER', number)
         elif token[0] == 'COMPLEX':
             return ASTNode('COMPLEX', token[1])  # Directly create a complex node
-        elif token[0] == 'VARIABLE':
+        elif token[0] == 'VARIABLE' and tokens and tokens[0][0] != 'LPAREN':
             return ASTNode('VARIABLE', token[1])
-        elif token[0] == 'LPAREN':  # Handle parentheses
-            expr = parse_expression()  # Parse the inner expression
-            if not tokens or tokens.pop(0)[0] != 'RPAREN':  # Expect a closing ')'
-                raise ValueError("Missing closing parenthesis")
-            return expr
+        elif token[0] == 'VARIABLE' and tokens and tokens[0][0] == 'LPAREN':
+            expr = parse_function()  # Parse the inner expression
+            print("-----------EXPR", expr)
+            return ASTNode('FUNCTION', function=token[1], func_exp=expr)
+
         elif token[0] == 'LBRACKET':
             expr = parse_matrix()
-            print(" | Matrix : ", expr)
-            print(" | Tokens : ", tokens)
-
             if not tokens or tokens.pop(0)[0] != 'RBRACKET':
-                raise ValueError("Missing closing bracket")
+                raise ValueError("Missing closing bracket for matrix")
             return expr
+        elif token[0] == 'FUNCTION':
+            return parse_function()
         else:
             raise ValueError(f"Unexpected token: {token}")
+
+    # advanced parser 
+
+    def parse_matrix():
+        if not tokens:
+            raise ValueError("Unexpected end of input")
+        
+        rows = []
+        size = 0
+
+        while tokens and tokens[0][0] == 'LBRACKET':
+
+            tokens.pop(0)  # Consume '['
+            row = []
+            while tokens and tokens[0][0] != 'RBRACKET':
+                if tokens[0][0] == 'COMMA':
+                    tokens.pop(0)  # Consume ','
+                row.append(parse_expression())
+            
+            if tokens[0][0] == 'RBRACKET':
+                tokens.pop(0)  # Consume ']'
+            if tokens[0][0] == 'SEMICOLON':
+                tokens.pop(0)  # Consume ';'
+    
+            if size == 0:
+                size = len(row)
+            elif size != len(row):
+                raise ValueError("Matrix rows must have the same number of columns")
+            rows.append(row)
+
+        
+        return ASTNode('MATRIX', matrix=rows)
+
+    def parse_function():
+        pass
+
+
+
+        
 
     ast = parse_expression()
     return ast

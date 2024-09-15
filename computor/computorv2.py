@@ -43,7 +43,10 @@ def main():
     count = 0
     while True:
         user_input = input(COLORS["BOLD"] + f"clc({count})> " + COLORS["RESET"])
-        if user_input.lower() == 'exit' or user_input.lower() == 'q':
+        
+        if user_input == "":
+            continue 
+        elif user_input.lower() == 'exit' or user_input.lower() == 'q':
             break
         elif user_input == "!all":
             computorv2(user_input, DEBUG)
@@ -56,5 +59,27 @@ def main():
                 print_color("UNDERLINE", f" | = {result}")
             DEBUG and print_color("OKBLUE" , "-------------------")
         count += 1
+
+def test_case_main():
+    global context
+
+    # input = "a = [ [1,2,3] ;[4,5,6] ;[7,8,9] ] + [[10, 11, 12]; [13, 14, 15]; [16, 17, 18]"
+
+    input = "funA(x) = 2 * x^5 + 4x^2 - 5 * x + 4"
+
+    print_color( "WARNING", f"Input: {input}")
+
+    tokens  = lexer(input, DEBUG=True)
+    ast     = parser(tokens)
+
+    print_color("HEADER", f"AST: {ast} | value {ast.value}")
+    print_color("HEADER", f"Context: {context}")
+
+    exit()
+
+    context, result = evaluator(ast, context, DEBUG=True)
+    print_color("HEADER", f"Result: {result}")
+
 if __name__ == "__main__":
-    main()
+    # main()
+    test_case_main()
