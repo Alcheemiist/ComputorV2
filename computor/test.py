@@ -122,15 +122,15 @@ class TestComputorv2(unittest.TestCase):
         self.assertEqual(str(self.computor("varE = -4j - 4")), "(-4-4j)")
         pass
 
+    def test_matrix_assignment(self):
+        self.assertEqual(str(self.computor("matA = [[2,3];[4,3]]")), "[ 2 , 3 ]\n[ 4 , 3 ]")
+        self.assertEqual(str(self.computor("matB = [[3,4]]")), "[ 3 , 4 ]")
 
 
 # NOT IMPLEMENTED YET
 
 
    
-    # def test_matrix_assignment(self):
-    #     self.assertEqual(str(self.computor("matA = [[2,3];[4,3]]")), "[ 2 , 3 ]\n[ 4 , 3 ]")
-    #     self.assertEqual(str(self.computor("matB = [[3,4]]")), "[ 3 , 4 ]")
 
     # def test_function_assignment(self):
     #     self.assertEqual(str(self.computor("funA(x) = 2*x^5 + 4x^2 - 5*x + 4")), "2 * x^5 + 4 * x^2 - 5*x + 4")

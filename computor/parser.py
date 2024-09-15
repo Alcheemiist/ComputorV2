@@ -59,6 +59,29 @@ def parser(tokens):
             return ASTNode('OPERATOR', '-', ASTNode('NUMBER', 0), right)  # Unary minus as (0 - expr)
         return parse_primary()
     
+    def parse_matrix():
+        if not tokens:
+            raise ValueError("Unexpected end of input")
+        rows = []
+        print(" | Matrix Tokens : ", tokens)
+        while tokens :
+            tokens.pop(0)
+            row = []
+            while tokens and tokens[0][0] != 'SEMICOLON':
+                if tokens and tokens[0][0] == 'COMMA':
+                    tokens.pop(0)
+                row.append(parse_expression())
+            if tokens and tokens[0][0] == 'SEMICOLON':
+                tokens.pop(0)
+
+            rows.append(row)
+
+            if not tokens or tokens.pop(0)[0] != 'RBRACKET':
+                raise ValueError("Missing closing bracket")
+                
+        print(" | Rows : ", rows)
+        return ASTNode('MATRIX', rows)
+
     def parse_primary():
         if not tokens:
             raise ValueError("Unexpected end of input")
@@ -73,6 +96,14 @@ def parser(tokens):
             expr = parse_expression()  # Parse the inner expression
             if not tokens or tokens.pop(0)[0] != 'RPAREN':  # Expect a closing ')'
                 raise ValueError("Missing closing parenthesis")
+            return expr
+        elif token[0] == 'LBRACKET':
+            expr = parse_matrix()
+            print(" | Matrix : ", expr)
+            print(" | Tokens : ", tokens)
+
+            if not tokens or tokens.pop(0)[0] != 'RBRACKET':
+                raise ValueError("Missing closing bracket")
             return expr
         else:
             raise ValueError(f"Unexpected token: {token}")
