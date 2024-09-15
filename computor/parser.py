@@ -8,6 +8,7 @@ class ASTNode:
 
         if function:
             self.function = function
+            self.value = value
             self.func_exp = func_exp
             self.type = 'FUNCTION'
 
@@ -27,7 +28,7 @@ class ASTNode:
         elif self.type == 'MATRIX':
             return f"Matrix({self.value})"
         elif self.type == 'FUNCTION':
-            return f"Function({self.function}({self.left}))"
+            return f"Function({self.function}({self.value}))"
         
         else:
             return f"{self.type}({self.value})"
@@ -94,16 +95,30 @@ def parser(tokens):
             return ASTNode('VARIABLE', token[1])
         elif token[0] == 'VARIABLE' and tokens and tokens[0][0] == 'LPAREN':
             expr = parse_function()  # Parse the inner expression
-            print("-----------EXPR", expr)
-            return ASTNode('FUNCTION', function=token[1], func_exp=expr)
+            print("DEBUGGING : ", expr)
+            if "=" not in expr:
+                value = handle_function()
 
+                ## 
+                return ASTNode('FUNC_OPER', function=token[1], value=value)
+
+            var_expr = expr.split("=")[0].strip().strip("()")
+            expr = expr.split("=")[1].strip()
+            return ASTNode('FUNCTION', function=token[1], value=expr, func_exp=var_expr)
+        elif token[0] == 'LPAREN':
+            expr = parse_expression()
+            if not tokens or tokens.pop(0)[0] != 'RPAREN':
+                raise ValueError("Missing closing parenthesis")
+            return expr
         elif token[0] == 'LBRACKET':
             expr = parse_matrix()
             if not tokens or tokens.pop(0)[0] != 'RBRACKET':
                 raise ValueError("Missing closing bracket for matrix")
             return expr
+        elif token[0] == 'VARIABLE':
+            return ASTNode('VARIABLE', token[1])
         elif token[0] == 'FUNCTION':
-            return parse_function()
+            return ASTNode('FUNCTION', function=token[1], func_exp=parse_expression())
         else:
             raise ValueError(f"Unexpected token: {token}")
 
@@ -140,11 +155,23 @@ def parser(tokens):
         return ASTNode('MATRIX', matrix=rows)
 
     def parse_function():
-        pass
+        if not tokens:
+            raise ValueError("Unexpected end of input")
+        func_str = ""
+        for token in tokens:
+            func_str += token[1] + " "
+        return func_str
 
+    def handle_function():
 
+        print(tokens)
 
-        
+        for token in tokens:
+            if token[0] == 'LPAREN' or token[0] == 'RPAREN':
+                continue
+            if token[0] == 'NUMBER':
+                return token[1]
+        return None
 
     ast = parse_expression()
     return ast

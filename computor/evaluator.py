@@ -102,6 +102,21 @@ def evaluator(ast, context, DEBUG=False):
         else:
             raise ValueError(f"Unknown matrix operator: {operator}")
 
+    def process_function(left, right, operator):
+        if operator == '+':
+            return left.value + right.value
+        elif operator == '-':
+            return left.value - right.value
+        elif operator == '*':
+            return left.value * right.value
+        elif operator == '/':
+            return left.value / right.value
+        elif operator == '%':
+            return left.value % right.value
+        else:
+            raise ValueError(f"Unknown function operator: { operator }")
+
+
     def evaluate_node(node):
         
         if node.type == 'NUMBER':
@@ -121,7 +136,10 @@ def evaluator(ast, context, DEBUG=False):
             if isinstance(left, str) or isinstance(right, str):
                 return handle_complex(node)
             elif isinstance(left, list) or isinstance(right, list):
-                return process_matrix(left, right, node.value)
+                return process_matrix(left, right, node.value)               
+            elif left.type == 'FUNCTION' or right.type == 'FUNCTION':
+                if left.type == 'FUNCTION':
+                    return process_function(left, right, node.value)
                 
             elif node.value == '+':
                 return left + right
@@ -156,6 +174,9 @@ def evaluator(ast, context, DEBUG=False):
             if not node.value:
                 return []
             return [[evaluate_node(cell) for cell in row] for row in node.value]
+        elif node.type == 'FUNCTION':
+            context[node.function] = node.value
+            return  node.value
         else:
             raise ValueError(f"Unknown node type: {node.type}")
 

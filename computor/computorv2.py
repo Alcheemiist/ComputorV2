@@ -65,20 +65,37 @@ def test_case_main():
 
     # input = "a = [ [1,2,3] ;[4,5,6] ;[7,8,9] ] + [[10, 11, 12]; [13, 14, 15]; [16, 17, 18]"
 
-    input = "funA(x) = 2 * x^5 + 4x^2 - 5 * x + 4"
+
+    input = "f(y) = 43 * y / (4 % 2 * y)"
 
     print_color( "WARNING", f"Input: {input}")
-
     tokens  = lexer(input, DEBUG=True)
     ast     = parser(tokens)
-
     print_color("HEADER", f"AST: {ast} | value {ast.value}")
     print_color("HEADER", f"Context: {context}")
-
-    exit()
-
     context, result = evaluator(ast, context, DEBUG=True)
     print_color("HEADER", f"Result: {result}")
+
+    input1 = "R(x) = 43 * x / (4 * 2 + x)"
+
+    print_color( "WARNING", f"Input: {input1}")
+    tokens  = lexer(input1, DEBUG=True)
+    ast     = parser(tokens)
+    print_color("HEADER", f"AST: {ast} | value {ast.value}")
+    print_color("HEADER", f"Context: {context}")
+    context, result = evaluator(ast, context, DEBUG=True)
+    print_color("HEADER", f"Result: {result}")
+
+    input2 = "f(2) + R(4)"
+
+    print_color( "WARNING", f"Input: {input2}")
+    tokens  = lexer(input2, DEBUG=True)
+    ast     = parser(tokens)
+    print_color("HEADER", f"AST: {ast} | value {ast.value}")
+    print_color("HEADER", f"Context: {context}")
+    context, result = evaluator(ast, context, DEBUG=True)
+    print_color("HEADER", f"Result: {result}")
+
 
 if __name__ == "__main__":
     # main()
