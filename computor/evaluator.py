@@ -1,4 +1,6 @@
 from math import pow
+from lexer import lexer
+from parser import parser
 
 def evaluator(ast, context, DEBUG=False):
     
@@ -118,7 +120,7 @@ def evaluator(ast, context, DEBUG=False):
 
 
     def evaluate_node(node):
-        
+
         if node.type == 'NUMBER':
             return node.value
         elif node.type == 'COMPLEX':  # Handling complex numbers
@@ -131,16 +133,13 @@ def evaluator(ast, context, DEBUG=False):
         elif node.type == 'OPERATOR':
             left = evaluate_node(node.left)
             right = evaluate_node(node.right)
-            
             # Handle complex numbers
             if isinstance(left, str) or isinstance(right, str):
                 return handle_complex(node)
             elif isinstance(left, list) or isinstance(right, list):
                 return process_matrix(left, right, node.value)               
-            elif left.type == 'FUNCTION' or right.type == 'FUNCTION':
-                if left.type == 'FUNCTION':
-                    return process_function(left, right, node.value)
-                
+            # elif left and  isinstance(left, int) and left.type == 'FUNCTION' or right and right.type == 'FUNCTION':
+            #         return process_function(left, right, node.value)
             elif node.value == '+':
                 return left + right
             elif node.value == '-':
@@ -175,13 +174,35 @@ def evaluator(ast, context, DEBUG=False):
                 return []
             return [[evaluate_node(cell) for cell in row] for row in node.value]
         elif node.type == 'FUNCTION':
+            if node.function in context:
+                print(" | Function already defined")
+                print(" | Solve function : ", node.function)
+                print(" | Function expression : ", context[node.function])
+                print(" | Function variable : ", node.func_exp)
+                print(" | Function value : ", node.value)
+
             context[node.function] = node.value
             return  node.value
+        elif node.type == 'FUNCTION_OPERATION':
+
+            if node.function not in context:
+                raise ValueError(f"Undefined function: {node.function}")
+
+            node.func_exp = context[node.function]
+            for x in node.func_exp:
+                if x not in ['+', '-', '*', '/', '%', '^', '(', ')', ' ', '', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
+                    node.variable = x
+                    break
+            node.func_exp = node.func_exp.replace(node.variable, str(node.value.value))
+            tokens  = lexer(node.func_exp, DEBUG)
+            ast     = parser(tokens)
+            context_, result = evaluator(ast, context, DEBUG)
+            return result
+
+           
         else:
             raise ValueError(f"Unknown node type: {node.type}")
 
-    
-    
     
     DEBUG and print(" | Evaluator input : ", ast)
     result = evaluate_node(ast)

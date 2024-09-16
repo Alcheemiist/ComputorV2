@@ -189,14 +189,16 @@ class TestComputorv2(unittest.TestCase):
     def test_function_evaluation(self):
         self.computor("funA(x) = 2 * 4 + x")
         self.computor("funB(x) = 4 -5 + (x + 2)^2 - 4")
-        # self.assertEqual(self.computor("funA(2) + funB(4) ?"), 41)
-        # self.assertEqual(self.computor("funA(2) + funB(4) ?"), 41)
-        # self.assertEqual(self.computor("funA(2) + funB(4) ?"), 41)
+        self.assertEqual(self.computor("funA(2) + funB(4) ?"), 41)
+        self.assertEqual(self.computor("funA(2) + funB(4) + 2 ?"), 43)
+        self.assertEqual(self.computor("(funA(2) + funB(4)) * 2 ?"), 82)
+        self.assertEqual(self.computor("funA(2) + funB(4) + (2 * 3) - 4 ?"), 43)
 
-    # def test_equation_solving(self):
-    #     self.computor("funD(x) = x^2 + 2x + 1")
-    #     self.computor("y = 0")
-    #     self.assertEqual(self.computor("funD(x) = y ?"), "x^2 + 2x + 1 = 0\nUne solution sur R :\n-1")
+
+    def test_equation_solving(self):
+        self.computor("funD(x) = x^2 + 2x + 1")
+        self.computor("y = 0")
+        self.assertEqual(self.computor("funD(x) = y ?"), "x^2 + 2x + 1 = 0\nUne solution sur R :\n-1")
 
 
 if __name__ == '__main__':

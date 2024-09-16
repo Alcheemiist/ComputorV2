@@ -1,18 +1,27 @@
 
 class ASTNode:
-    def __init__(self, type, value=None, left=None, right=None, matrix=None, function=None, func_exp=None):
+    def __init__(self, type, value=None, left=None, right=None, matrix=None, function=None, func_exp=None, variable=None):
         self.type = type
         self.value = value
         self.left = left
         self.right = right
+        self.function = None
+        self.func_exp = None
+        self.variable = None
 
-        if function:
+        if self.type == 'FUNCTION':
             self.function = function
             self.value = value
             self.func_exp = func_exp
+            self.variable = None
             self.type = 'FUNCTION'
-
-        if matrix:
+        elif self.type == 'FUNCTION_OPERATION':
+            self.function = function
+            self.value = value
+            self.func_exp = func_exp
+            self.variable = variable
+            self.type = 'FUNCTION_OPERATION'
+        elif matrix:
             self.value = matrix
             self.type = 'MATRIX'
 
@@ -28,10 +37,14 @@ class ASTNode:
         elif self.type == 'MATRIX':
             return f"Matrix({self.value})"
         elif self.type == 'FUNCTION':
-            return f"Function({self.function}({self.value}))"
-        
+            return f"Function({self.function}({self.value})[{self.variable}]->{self.func_exp})"
+        elif self.type == 'FUNCTION_OPERATION':
+            return f"FUNCTION_OPERATION({self.function}({self.value.value}))"
         else:
             return f"{self.type}({self.value})"
+
+    def __repr__(self):
+        return str(self)
 
 def parser(tokens):
     def parse_expression():
@@ -95,13 +108,9 @@ def parser(tokens):
             return ASTNode('VARIABLE', token[1])
         elif token[0] == 'VARIABLE' and tokens and tokens[0][0] == 'LPAREN':
             expr = parse_function()  # Parse the inner expression
-            print("DEBUGGING : ", expr)
             if "=" not in expr:
-                value = handle_function()
-
-                ## 
-                return ASTNode('FUNC_OPER', function=token[1], value=value)
-
+                res = handle_function_operation(token[1])
+                return ASTNode('FUNCTION_OPERATION', function=token[1], value=res)
             var_expr = expr.split("=")[0].strip().strip("()")
             expr = expr.split("=")[1].strip()
             return ASTNode('FUNCTION', function=token[1], value=expr, func_exp=var_expr)
@@ -118,7 +127,7 @@ def parser(tokens):
         elif token[0] == 'VARIABLE':
             return ASTNode('VARIABLE', token[1])
         elif token[0] == 'FUNCTION':
-            return ASTNode('FUNCTION', function=token[1], func_exp=parse_expression())
+            return ASTNode('FUNCTION', function=token[1], value=expr, func_exp=parse_expression())
         else:
             raise ValueError(f"Unexpected token: {token}")
 
@@ -162,16 +171,17 @@ def parser(tokens):
             func_str += token[1] + " "
         return func_str
 
-    def handle_function():
-
-        print(tokens)
-
-        for token in tokens:
-            if token[0] == 'LPAREN' or token[0] == 'RPAREN':
-                continue
-            if token[0] == 'NUMBER':
-                return token[1]
-        return None
+    def handle_function_operation(func_name):
+        args = []
+        if tokens and tokens[0][0] == 'LPAREN':
+            tokens.pop(0)  # Consume '('
+            while tokens and tokens[0][0] != 'RPAREN':
+                if tokens[0][0] == 'COMMA':
+                    tokens.pop(0)  # Consume ','
+                args.append(parse_expression())
+            if not tokens or tokens.pop(0)[0] != 'RPAREN':
+                raise ValueError(f"Missing closing parenthesis for function {func_name}")
+        return args[0]
 
     ast = parse_expression()
     return ast
