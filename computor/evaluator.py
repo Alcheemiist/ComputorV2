@@ -118,6 +118,8 @@ def evaluator(ast, context, DEBUG=False):
         else:
             raise ValueError(f"Unknown function operator: { operator }")
 
+    def solve_equation():
+        exit()
 
     def evaluate_node(node):
 
@@ -180,7 +182,7 @@ def evaluator(ast, context, DEBUG=False):
                 print(" | Function expression : ", context[node.function])
                 print(" | Function variable : ", node.func_exp)
                 print(" | Function value : ", node.value)
-
+                solve_equation()
             context[node.function] = node.value
             return  node.value
         elif node.type == 'FUNCTION_OPERATION':

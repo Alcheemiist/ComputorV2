@@ -60,6 +60,41 @@ def main():
             DEBUG and print_color("OKBLUE" , "-------------------")
         count += 1
 
+def test_case_main():
+    global context
+
+    # input = "a = [ [1,2,3] ;[4,5,6] ;[7,8,9] ] + [[10, 11, 12]; [13, 14, 15]; [16, 17, 18]"
+
+
+    input = "f(y) = x^2 + 2 * x + 1"
+
+    print_color( "WARNING", f"Input: {input}")
+    tokens  = lexer(input, DEBUG=True)
+    ast     = parser(tokens)
+    print_color("HEADER", f"AST: {ast} | value {ast.value}")
+    print_color("HEADER", f"Context: {context}")
+    context, result = evaluator(ast, context, DEBUG=True)
+    print_color("HEADER", f"Result: {result}")
+
+    input1 = "y = 1"
+
+    print_color( "WARNING", f"Input: {input1}")
+    tokens  = lexer(input1, DEBUG=True)
+    ast     = parser(tokens)
+    print_color("HEADER", f"AST: {ast} | value {ast.value}")
+    print_color("HEADER", f"Context: {context}")
+    context, result = evaluator(ast, context, DEBUG=True)
+    print_color("HEADER", f"Result: {result}")
+
+    input2 = "f(2) = 10"
+
+    print_color( "WARNING", f"Input: {input2}")
+    tokens  = lexer(input2, DEBUG=True)
+    ast     = parser(tokens)
+    print_color("HEADER", f"AST: {ast} | value {ast.value}")
+    print_color("HEADER", f"Context: {context}")
+    context, result = evaluator(ast, context, DEBUG=True)
+    print_color("HEADER", f"Result: {result}")
 
 
 if __name__ == "__main__":
