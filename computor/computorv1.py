@@ -1,5 +1,4 @@
 import re
-import sys
 from fractions import Fraction
 
 # play with console colors
@@ -149,12 +148,11 @@ class Polynomial:
                 self.solutions = "No solution"
                 print(f"{red}No solution")
             else:
-                self.solutions = [0]
                 x = (-1 * float(self.reduced_form['0']) / float(self.reduced_form['1']))
-                self.solutions[0] = x
+                self.solutions = x
                 # -> -1 * a0 / a1 
-                print(f" X = {green}",Fraction(self.solutions[0]).limit_denominator() , " = ", x, f"{reset}")
-                return self.solutions
+                print(f" X = {green}",Fraction(self.solutions).limit_denominator() , " = ", x, f"{reset}")
+                return x
 
         if int(self.degree) == 2:
             # Calculate the discriminant : delta = b^2 - 4ac
@@ -179,7 +177,7 @@ class Polynomial:
                 print(f"{green}Discriminant is zero, the solution is: x = -b / 2a")
                 if self.reduced_form["2"] == 0:
                     print(f"{green}Division by zero, there are no real solutions{reset}")
-                    return None, None
+                    return None
                 print(-self.reduced_form["1"] / (2 *  self.reduced_form["2"]))
                 self.solution[0] = -self.reduced_form["1"] / (2 *  self.reduced_form["2"])
                 return -self.reduced_form["1"] / (2 *  self.reduced_form["2"]), None    
@@ -199,7 +197,6 @@ class Polynomial:
             print(f"{green}> The polynomial degree is less than 2nd degree, I can solve{reset}")
             self.solve()
             return self.get_solutions()
-
 
 def print_error(msg):
     print(red, msg,reset)
@@ -272,21 +269,3 @@ def computorv1(equation, DEBUG=False):
     solutions = N.Handle_equation()
     DEBUG and print(f"{yellow}-------------------- Equation solved with {(len(solutions))} solution --------------------------{reset}")
     return solutions
-
-if __name__ == "__main__":
-    equation = get_test_equation()
-
-    # clear the console
-    print(chr(27) + "[2J")
-
-    # Read the equation from the command line if exist and handle errors
-    if len(sys.argv) > 2:
-        print(f"{red}Error: Invalid number of arguments{reset}")
-        exit(0)
-    elif len(sys.argv) == 2:
-        equation = sys.argv[1]
-        Handle_errors(sys.argv[1])
-    else:
-        print(equation)
-
-    computorv1(equation)

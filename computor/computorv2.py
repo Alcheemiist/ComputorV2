@@ -96,7 +96,6 @@ def test_case_main():
     context, result = evaluator(ast, context, DEBUG=True)
     print_color("HEADER", f"Result: {result}")
 
-
 if __name__ == "__main__":
-    # main()
-    test_case_main()
+    main()
+    # test_case_main()

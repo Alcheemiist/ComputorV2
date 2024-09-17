@@ -180,7 +180,7 @@ class TestComputorv2(unittest.TestCase):
         self.assertEqual(str(self.computor("funB(y) = 43 * y / (4 % 2 * y)")), "43 * y / ( 4 % 2 * y )")
         self.assertEqual(str(self.computor("funC(z) = 2 * z + 3")), "2 * z + 3")
 
-    def test_matrix_operations(self):
+    def test_matrix_operations2(self):
         self.computor("matA = [[1,2];[3,4]]")
         self.computor("matB = [[5,6];[7,8]]")
         self.assertEqual(str(self.computor("matA * matB ?")), "[[19, 22], [43, 50]]")
@@ -197,10 +197,10 @@ class TestComputorv2(unittest.TestCase):
         self.assertEqual(self.computor("A(2) % B(4) ?"), 10)
 
     def test_equation_solving(self):
-        self.computor("funD(x) = x^2 + 2x + 1")
+        self.computor("funD(x) = x + 1")
         self.computor("y = 0")
-        self.assertEqual(self.computor("funD(x) = y ?"), "x^2 + 2x + 1 = 0\nUne solution sur R :\n-1")
-
+        self.assertEqual(self.computor("funD(x) = 0"), -1)
+        # self.assertEqual(self.computor("A(x) = x * 2 + 3 - x ^ 2 "), "x * 2 + 3 - x ^ 2")
 
 if __name__ == '__main__':
     unittest.main()

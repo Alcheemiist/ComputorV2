@@ -105,14 +105,14 @@ def evaluator(ast, context, DEBUG=False):
         else:
             raise ValueError(f"Unknown matrix operator: {operator}")
 
-    def validate_function(node):
-        print(" | Context : ", context)
-        print(f" | Solve function : {node.function}({node.variable}) = {node.func_exp} = {node.value}")
-        print(" | Function expression : ", node.func_exp)
-        print(" | Function variable : ", node.variable)
-        print(" | Function value : ", node.value)
+    def validate_function(node, DEBUG=False):
+        if DEBUG:
+            print(" | Context : ", context)
+            print(f" | Solve function : {node.function}({node.variable}) = {node.func_exp} = {node.value}")
+            print(" | Function expression : ", node.func_exp)
+            print(" | Function variable : ", node.variable)
+            print(" | Function value : ", node.value)
 
-        # check variable if exist and no other variables there
         rhs = node.func_exp.split()
         lhs = node.value.strip().split()
 
@@ -131,7 +131,6 @@ def evaluator(ast, context, DEBUG=False):
                         raise ValueError(f"Function {node.func_exp} has multiple variables {n} != {node.variable}")
 
                 rexp += token + " * X^0 "          
-
         # ------------------- #
         
         lexp = ""
@@ -145,26 +144,24 @@ def evaluator(ast, context, DEBUG=False):
                 if lhs[ lhs.index(token) + 1 ] != '^':
                     lexp += "1 * X^1 "
                 continue
-            
             for n in token:
                 if  n not in [node.variable,'0', '1', '2', '3', '4', '5', '6', '7','8','9']:
                     raise ValueError(f"Function {node.func_exp} has multiple variables {n} != {node.variable}")
 
             lexp += token + " * X^0 "   
 
-        print(" | Function rexp : ", rexp)
-        print(" | Function lexp : ", lexp)
- 
+        DEBUG and print(" | Function rexp : ", rexp)
+        DEBUG and print(" | Function lexp : ", lexp)
         return f"{rexp} = {lexp}"
 
-    def solve_equation(node):
+    def solve_equation(node, DEBGUG=False):
         if context[node.function]:
             node.variable = node.func_exp.strip()
             node.func_exp = context[node.function]
         else:
             raise ValueError(f"Function {node.function} not defined") 
         equation = validate_function(node)
-        print(" | SOLVE : ", equation)
+        DEBUG and print(" | SOLVE : ", equation)
         return computorv1(equation)
 
     def evaluate_node(node):
@@ -219,7 +216,7 @@ def evaluator(ast, context, DEBUG=False):
                 return []
             return [[evaluate_node(cell) for cell in row] for row in node.value]
         elif node.type == 'FUNCTION':
-            print(" | DEBUUG : ", node)
+            DEBUG and print(" | DEBUUG : ", node)
             if node.function in context  and not isnumber(node.func_exp) and check_function(node.function, context[node.function], node.value):
                 return solve_equation(node)
             context[node.function] = node.value
@@ -248,8 +245,6 @@ def evaluator(ast, context, DEBUG=False):
         return context, result
         
     return main_evaluator()
-
-
 
 def isnumber(s):
     try:
