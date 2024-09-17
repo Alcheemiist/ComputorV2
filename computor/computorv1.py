@@ -90,21 +90,19 @@ class Polynomial:
         self.lhs_dict = terms
 
     def parse_equation(self, equation, DEBUG=False):
-        print(f"{yellow}> Parsing equation : ", equation, f"{reset}------------------->")
-        # Step 1: Split the equation into left-hand side and right-hand side
+        print(f"{yellow}> Parsing equation : ", equation, f"{reset}")
         try:
             self.lhs, self.rhs = equation.split('=')
         except ValueError:
-            print(f"{red}Error: Equation must contain an equal sign{reset}")
-            exit(0)
+            raise ValueError("Error: Equation must contain an equal sign")
 
-        # print(" - Split the equation into left-hand side and right-hand side")
         DEBUG and print(f"\n  -> Left-hand side:{yellow}", self.lhs, f"{reset}")
         DEBUG and print(f"  -> Right-hand side:{yellow}", self.rhs, f"{reset}\n")
-        # Step 2: Move all terms to the left-hand side
+
         self.rhs = self.rhs.replace('-', '+ -')  # Handle minus signs on the right side
         rhs_terms = self.rhs.split('+')
         rhs_terms = [term.strip() for term in rhs_terms if term.strip()]  # Remove empty spaces
+        
         # print("  -> rhs_terms:", rhs_terms)
         rhs_parsed = ['-1 * ' + term if not term.startswith('-') else term.replace('-', '') for term in rhs_terms]
         DEBUG and print("  -> rhs extracted :", rhs_parsed)
@@ -198,6 +196,8 @@ class Polynomial:
             self.solve()
             return self.get_solutions()
 
+
+
 def print_error(msg):
     print(red, msg,reset)
     exit()
@@ -217,55 +217,68 @@ def Handle_errors(equation):
         print(f"{red}Error: Equation must contain an X variable{reset}")
         exit(0)
 
-def get_test_equation():
-        # Test cases
-        # case 0 : second degree
-        equation = "3 * X^2 + 5 * X^1 = 2 * X^0"
-        # Reduced form:  3.0 * X^2 + 5.0 * X^1 - 2.0 * X^0 = 0
-        # Polynomial degree: 2
-        # Discriminant is strictly positive, the two solutions are:
-        # -2, 1/3    
-    
-        # Case 1:  second degree
-        # equation =  "5 * X^0 + 4 * X^1 - 9.3 * X^2 = 1 * X^0"
-        # Reduced form: 4 * X^0 + 4 * X^1 - 9.3 * X^2 = 0
-        # Polynomial degree: 2
-        # Discriminant is strictly positive, the two solutions are:
-        # 0.905239, -0.475131
-        
-        # Case 2: one degree
-        # equation =  "5 * X^0 + 4 * X^1 = 4 * X^0"
-        # Reduced form: 1 * X^0 + 4 * X^1 = 0
-        # Polynomial degree: 1
-        # The solution is: -0.25
-
-        # Case 3: greater than 2
-        # equation = "8 * X^0 - 6 * X^1 + 0 * X^2 - 5.6 * X^3 = 3 * X^0"
-        # Reduced form: 5 * X^0 - 6 * X^1 + 0 * X^2 - 5.6 * X^3 = 0
-        # Polynomial degree: 3
-        # The polynomial degree is strictly greater than 2, I can't solve.
-
-        # Case 4: zero degree
-        # equation = "5 * X^0 = 154 * X^0"
-        # Reduced form: 0 * X^0 = 0
-        # Polynomial degree: 0
-        # All real numbers are solutions.
-
-        # case 5 : error equation format : a X^2
-        # equation = "1 * X^2 + X^1 = 1 * X^2"
-
-        # case 6 : error equation format :1 
-        # equation = "1 * X^2 + 5 * X^1 = 1 "
-
-        return equation
-
 def computorv1(equation, DEBUG=False):
-    DEBUG and print(f"{yellow}--------- Lets solve with ComputorV1! -------------{reset}\n")
-    N = Polynomial()
-    N.parse_equation(equation, DEBUG)
-    N.transform_terms()
-    N.print_reduced_form()
-    DEBUG and print(f"{yellow}  Polynomial Degree:", N.get_degree(), end=f" > {reset}")
-    solutions = N.Handle_equation()
-    DEBUG and print(f"{yellow}-------------------- Equation solved with {(len(solutions))} solution --------------------------{reset}")
+    validate_equation(equation)
+    p = Polynomial(equation)
+    solutions = p.solve()
+    p.print_solution()
+
     return solutions
+
+def validate_equation(equation):
+    if not re.match(r'^[X0-9\^\+\-\=\*\.\s]*$', equation):
+        print_error("Invalid characters in the equation")
+    if equation.find('=') == -1:
+        print_error("This is not an equation")
+    if equation.split('=')[1].strip() == "":
+        print_error("Left-hand side of the equation is empty")
+    if equation.split('=')[1].strip().find("X") == -1 and equation.split('=')[0].strip().find("x") == -1:
+        print_error("Equation must contain an X variable")
+
+if __name__ == "__main__":
+
+    # Test cases
+    # case 0 : second degree
+    print(computorv1("3 * X^2 + 5 * X^1 = 2 * X^0", DEBUG=False))
+    # Reduced form:  3.0 * X^2 + 5.0 * X^1 - 2.0 * X^0 = 0
+    # Polynomial degree: 2
+    # Discriminant is strictly positive, the two solutions are:
+    # -2, 1/3 
+
+    # print(computorv1("5 * X^0 + 4 * X^1 = 4 * X^0"))
+    # print(computorv1("8 * X^0 - 6 * X^1 + 0 * X^2 - 5.6 * X^3 = 3 * X^0"))
+    # print(computorv1("5 * X^0 = 154 * X^0"))
+    # print(computorv1("1 * X^2 + X^1 = 1 * X^2"))
+    # print(computorv1("1 * X^2 + 5 * X^1 = 1 "))
+    # print(computorv1("3 * X^2 + 5 * X^1 = 2 * X^0"))
+
+    # Case 1:  second degree
+    # equation =  "5 * X^0 + 4 * X^1 - 9.3 * X^2 = 1 * X^0"
+    # Reduced form: 4 * X^0 + 4 * X^1 - 9.3 * X^2 = 0
+    # Polynomial degree: 2
+    # Discriminant is strictly positive, the two solutions are:
+    # 0.905239, -0.475131
+    
+    # Case 2: one degree
+    # equation =  "5 * X^0 + 4 * X^1 = 4 * X^0"
+    # Reduced form: 1 * X^0 + 4 * X^1 = 0
+    # Polynomial degree: 1
+    # The solution is: -0.25
+
+    # Case 3: greater than 2
+    # equation = "8 * X^0 - 6 * X^1 + 0 * X^2 - 5.6 * X^3 = 3 * X^0"
+    # Reduced form: 5 * X^0 - 6 * X^1 + 0 * X^2 - 5.6 * X^3 = 0
+    # Polynomial degree: 3
+    # The polynomial degree is strictly greater than 2, I can't solve.
+
+    # Case 4: zero degree
+    # equation = "5 * X^0 = 154 * X^0"
+    # Reduced form: 0 * X^0 = 0
+    # Polynomial degree: 0
+    # All real numbers are solutions.
+
+    # case 5 : error equation format : a X^2
+    # equation = "1 * X^2 + X^1 = 1 * X^2"
+
+    # case 6 : error equation format :1 
+    # equation = "1 * X^2 + 5 * X^1 = 1 "
