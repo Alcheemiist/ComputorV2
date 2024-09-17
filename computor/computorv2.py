@@ -66,7 +66,7 @@ def test_case_main():
     # input = "a = [ [1,2,3] ;[4,5,6] ;[7,8,9] ] + [[10, 11, 12]; [13, 14, 15]; [16, 17, 18]"
 
 
-    input = "A(y) = y * 2 + y + 3"
+    input = "AA(y) = y + 2 + y + 3"
 
     print_color( "WARNING", f"Input: {input}")
     tokens  = lexer(input, DEBUG=True)
@@ -76,7 +76,7 @@ def test_case_main():
     context, result = evaluator(ast, context, DEBUG=True)
     print_color("HEADER", f"Result: {result}")
 
-    input1 = "y = 1"
+    input1 = "r = 1"
 
     print_color( "WARNING", f"Input: {input1}")
     tokens  = lexer(input1, DEBUG=True)
@@ -86,7 +86,7 @@ def test_case_main():
     context, result = evaluator(ast, context, DEBUG=True)
     print_color("HEADER", f"Result: {result}")
 
-    input2 = "A(y) = 10"
+    input2 = "AA(y) = 10"
 
     print_color( "WARNING", f"Input: {input2}")
     tokens  = lexer(input2, DEBUG=True)

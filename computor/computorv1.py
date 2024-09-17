@@ -32,15 +32,15 @@ class Polynomial:
         return self.solutions
     
     def print_reduced_form(self):
-        print(f"\n{yellow}> Reduced form : {green} [ ", end=f"")
+        print(f"{yellow}> Reduced form : {green} [ ", end=f"")
         for power, coef , i in zip(self.reduced_form.keys(), self.reduced_form.values(), range(len(self.reduced_form))):
             print(f"{coef} * X^{power}", end="")
             if i < len(self.reduced_form) - 1:
                 print(" + ", end="")
-        print(f" = 0 ] {reset}\n")
+        print(f" = 0 ] {reset}")
 
-    def extract_rhs_terms(self, rhs_parsed):
-        print("\n > Parsing right-hand side terms..", self.rhs, "---------------->")
+    def extract_rhs_terms(self, rhs_parsed, DEBUG=False):
+        DEBUG and  print("\n > Parsing right-hand side terms..", self.rhs, "---------------->")
         # multiply coef by -1 to get the reduced form
         for i in range(len(rhs_parsed)):
             # print("   *> Adding term:", rhs_parsed[i])
@@ -56,13 +56,15 @@ class Polynomial:
                 power = rhs_term[2].split('^')[1]
             
             self.rhs_dict[i] = (coef, power)
-        print(f"  -> rhs_dict[{len(self.rhs_dict)}]:", self.rhs_dict)
+        DEBUG and print(f"  -> rhs_dict[{len(self.rhs_dict)}]:", self.rhs_dict)
 
-    def extract_lhs_terms(self):
-        print("\n > Parsing left-hand side terms..", self.lhs, "------------->")
+    def extract_lhs_terms(self, DEBUG=False):
+        DEBUG and print("\n > Parsing left-hand side terms..", self.lhs, "------------->")
         lhs_parsed = self.lhs.split('+')
         lhs_parsed = [term.strip() for term in lhs_parsed if term.strip()]  # Remove empty spaces
         terms = []
+        print
+
         for i in range(len(lhs_parsed)):
             lhs_term = lhs_parsed[i].split('-')
             # print("   -> Adding term:", lhs_term)
@@ -71,6 +73,7 @@ class Polynomial:
                 # print("     -> lhs_term[", i + k, "]:", lhs_term[k])
                 lhs_parse_term = lhs_term[k].split('*')
                 lhs_parse_term = [term.strip() for term in lhs_parse_term if term.strip()]  # Remove empty spaces
+                # print("    -> lhs_parse", lhs_parse_term)
                 if len(lhs_parse_term) == 2 and lhs_parse_term[1].startswith('X') and k == 0:
                     coef = float(lhs_parse_term[0])
                     if len(lhs_parse_term[1].split('^')) == 2:
@@ -84,11 +87,11 @@ class Polynomial:
                     print_error(" Term is not in the form a * X^b -> " + lhs_parse_term[k])
                 # print("     -> Coefficient:", coef, "Power:", power)
                 terms.append((coef, power))
-        print(f"  -> lhs_dict[{len(terms)}]:", terms)
+        # print(f"  -> lhs_dict[{len(terms)}]:", terms)
         self.lhs_dict = terms
 
-    def parse_equation(self, equation):
-        print(f"> Parsing equation..{yellow}", equation, f"{reset}------------------->")
+    def parse_equation(self, equation, DEBUG=False):
+        print(f"{yellow}> Parsing equation : ", equation, f"{reset}------------------->")
         # Step 1: Split the equation into left-hand side and right-hand side
         try:
             self.lhs, self.rhs = equation.split('=')
@@ -97,15 +100,15 @@ class Polynomial:
             exit(0)
 
         # print(" - Split the equation into left-hand side and right-hand side")
-        print(f"\n  -> Left-hand side:{yellow}", self.lhs, f"{reset}")
-        print(f"  -> Right-hand side:{yellow}", self.rhs, f"{reset}\n")
+        DEBUG and print(f"\n  -> Left-hand side:{yellow}", self.lhs, f"{reset}")
+        DEBUG and print(f"  -> Right-hand side:{yellow}", self.rhs, f"{reset}\n")
         # Step 2: Move all terms to the left-hand side
         self.rhs = self.rhs.replace('-', '+ -')  # Handle minus signs on the right side
         rhs_terms = self.rhs.split('+')
         rhs_terms = [term.strip() for term in rhs_terms if term.strip()]  # Remove empty spaces
         # print("  -> rhs_terms:", rhs_terms)
         rhs_parsed = ['-1 * ' + term if not term.startswith('-') else term.replace('-', '') for term in rhs_terms]
-        print("  -> rhs extracted :", rhs_parsed)
+        DEBUG and print("  -> rhs extracted :", rhs_parsed)
 
         # Convert terms from the rhs and lhs sides into dict {power: coefficient} 
         self.extract_rhs_terms(rhs_parsed)
@@ -113,7 +116,7 @@ class Polynomial:
 
     def transform_terms(self):
         all_terms = self.lhs_dict + list(self.rhs_dict.values())
-        print("\n> Function terms:", all_terms)
+        print("> Function terms:", all_terms)
 
         self.reduced_form = {}
         for term in all_terms:
@@ -125,11 +128,11 @@ class Polynomial:
         print(f"> Transformed Function terms:{yellow}", self.reduced_form , f"{reset}")
 
     def solve(self):
-        print(f"\n{yellow}> Solving the equation--------------- : \n")
-        print(f"  -> Degree:{orange}", self.degree, f"{reset}")
-        print(f" {yellow} -> Terms:{orange}", self.reduced_form, f"\n{reset}")
+        print(f"{yellow}> Solving the equation : ", end="")
+        print(f"  -> Degree:{orange}", self.degree, f"{reset}", end="")
+        print(f" {yellow} -> Terms:{orange}", self.reduced_form, f"{reset}")
         
-        print(f"{orange}The solution is : ", end="")
+        print(f"{orange}> The solution is : ", end="")
 
         if int(self.degree) == 0:
 
@@ -146,18 +149,20 @@ class Polynomial:
                 self.solutions = "No solution"
                 print(f"{red}No solution")
             else:
+                self.solutions = [0]
                 x = (-1 * float(self.reduced_form['0']) / float(self.reduced_form['1']))
-                self.solutions = Fraction(x).limit_denominator()
-                print(f" X -> -1 * a0 / a1 = {green}",self.solutions , " = ", x, f"{reset}")
-                return self.solutions, None
+                self.solutions[0] = x
+                # -> -1 * a0 / a1 
+                print(f" X = {green}",Fraction(self.solutions[0]).limit_denominator() , " = ", x, f"{reset}")
+                return self.solutions
 
         if int(self.degree) == 2:
             # Calculate the discriminant : delta = b^2 - 4ac
             delta = self.reduced_form["1"] ** 2 - 4 * self.reduced_form["2"] * self.reduced_form["0"]
-            print("\nDelta:", delta, end=" -> ")
+            print("\n> Delta:", delta, end=" -> ")
 
             if delta > 0:
-                print("Discriminant is strictly positive, the two solutions are: x1 = (-b + sqrt(delta) / 2a) and x2 = (-b - sqrt(delta) / 2a)")
+                print("> Discriminant is strictly positive, the two solutions are: x1 = (-b + sqrt(delta) / 2a) and x2 = (-b - sqrt(delta) / 2a)")
 
                 # Convert solutions to irreducible fractions
                 self.solutions = [0, 0]
@@ -176,6 +181,7 @@ class Polynomial:
                     print(f"{green}Division by zero, there are no real solutions{reset}")
                     return None, None
                 print(-self.reduced_form["1"] / (2 *  self.reduced_form["2"]))
+                self.solution[0] = -self.reduced_form["1"] / (2 *  self.reduced_form["2"])
                 return -self.reduced_form["1"] / (2 *  self.reduced_form["2"]), None    
             elif delta < 0:
                 print(f"{orange}Discriminant is strictly negative, let's solve it with complex numbers")
@@ -187,10 +193,10 @@ class Polynomial:
     def Handle_equation(self):
         degree = self.get_degree()
         if int(degree) > 2:
-            print(f"{red}The polynomial degree is stricly greater than 2nd degree, I can't solve{reset}")
-            exit(0)
+            print(f"{red}> The polynomial degree is stricly greater than 2nd degree, I can't solve{reset}")
+            return None, None
         else:
-            print(f"{green}The polynomial degree is less than 2nd degree, I can solve{reset}")
+            print(f"{green}> The polynomial degree is less than 2nd degree, I can solve{reset}")
             self.solve()
             return self.get_solutions()
 
@@ -256,15 +262,16 @@ def get_test_equation():
 
         return equation
 
-def computorv1(equation):
-    print(f"{yellow}--------- Welcome to Alchemist ComputorV1! -------------{reset}\n")
+def computorv1(equation, DEBUG=False):
+    DEBUG and print(f"{yellow}--------- Lets solve with ComputorV1! -------------{reset}\n")
     N = Polynomial()
-    N.parse_equation(equation)
+    N.parse_equation(equation, DEBUG)
     N.transform_terms()
     N.print_reduced_form()
-    print(f"{yellow}  Polynomial Degree:", N.get_degree(), end=f" > {reset}")
-    N.Handle_equation()
-    print(f"{yellow}-------------------- Goodbye! --------------------------{reset}")
+    DEBUG and print(f"{yellow}  Polynomial Degree:", N.get_degree(), end=f" > {reset}")
+    solutions = N.Handle_equation()
+    DEBUG and print(f"{yellow}-------------------- Equation solved with {(len(solutions))} solution --------------------------{reset}")
+    return solutions
 
 if __name__ == "__main__":
     equation = get_test_equation()
