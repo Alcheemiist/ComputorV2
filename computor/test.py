@@ -187,13 +187,14 @@ class TestComputorv2(unittest.TestCase):
         self.assertEqual(str(self.computor("2 * matA ?")), "[[2, 4], [6, 8]]")
 
     def test_function_evaluation(self):
-        self.computor("funA(x) = 2 * 4 + x")
-        self.computor("funB(x) = 4 -5 + (x + 2)^2 - 4")
-        self.assertEqual(self.computor("funA(2) + funB(4) ?"), 41)
-        self.assertEqual(self.computor("funA(2) + funB(4) + 2 ?"), 43)
-        self.assertEqual(self.computor("(funA(2) + funB(4)) * 2 ?"), 82)
-        self.assertEqual(self.computor("funA(2) + funB(4) + (2 * 3) - 4 ?"), 43)
-
+        self.assertEqual(self.computor("A(x) = 2 * 4 + x"), "2 * 4 + x")
+        self.computor("B(x) = 4 -5 + (x + 2)^2 - 4")
+        self.assertEqual(self.computor("A(2) + B(4) ?"), 41)
+        self.assertEqual(self.computor("A(2) + B(4) + 2 ?"), 43)
+        self.assertEqual(self.computor("A(2) - B(4) ?"), -21)
+        self.assertEqual(self.computor("A(2) * B(4) ?"), 310)
+        self.assertEqual(self.computor("A(2) / B(4) ?"), 0.3225806451612903)
+        self.assertEqual(self.computor("A(2) % B(4) ?"), 10)
 
     def test_equation_solving(self):
         self.computor("funD(x) = x^2 + 2x + 1")

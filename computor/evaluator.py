@@ -1,6 +1,7 @@
 from math import pow
 from lexer import lexer
 from parser import parser
+from computorv1 import computorv1
 
 def evaluator(ast, context, DEBUG=False):
     
@@ -104,22 +105,33 @@ def evaluator(ast, context, DEBUG=False):
         else:
             raise ValueError(f"Unknown matrix operator: {operator}")
 
-    def process_function(left, right, operator):
-        if operator == '+':
-            return left.value + right.value
-        elif operator == '-':
-            return left.value - right.value
-        elif operator == '*':
-            return left.value * right.value
-        elif operator == '/':
-            return left.value / right.value
-        elif operator == '%':
-            return left.value % right.value
-        else:
-            raise ValueError(f"Unknown function operator: { operator }")
+    def validate_function(node):
+        print(" | Context : ", context)
+        print(f" | Solve function : {node.function}({node.variable}) = {node.func_exp} = {node.value}")
+        print(" | Function expression : ", node.func_exp)
+        print(" | Function variable : ", node.variable)
+        print(" | Function value : ", node.value)
 
-    def solve_equation():
-        exit()
+        # check variable if exist and no other variables there
+        expression = node.func_exp.split()
+        print(expression)
+
+        pass
+
+    def solve_equation(node):
+        if context[node.function]:
+            node.func_exp = context[node.function]
+            node.variable = node.func_exp
+        else:
+            raise ValueError(f"Function {node.function} not defined") 
+            
+
+        validate_function(node)
+
+        equation = f"{node.func_exp} = {node.value} * {node.variable} ^ 0"
+        print(equation)
+        computorv1(equation)
+        return None
 
     def evaluate_node(node):
 
@@ -140,8 +152,6 @@ def evaluator(ast, context, DEBUG=False):
                 return handle_complex(node)
             elif isinstance(left, list) or isinstance(right, list):
                 return process_matrix(left, right, node.value)               
-            # elif left and  isinstance(left, int) and left.type == 'FUNCTION' or right and right.type == 'FUNCTION':
-            #         return process_function(left, right, node.value)
             elif node.value == '+':
                 return left + right
             elif node.value == '-':
@@ -176,13 +186,8 @@ def evaluator(ast, context, DEBUG=False):
                 return []
             return [[evaluate_node(cell) for cell in row] for row in node.value]
         elif node.type == 'FUNCTION':
-            if node.function in context:
-                print(" | Function already defined")
-                print(" | Solve function : ", node.function)
-                print(" | Function expression : ", context[node.function])
-                print(" | Function variable : ", node.func_exp)
-                print(" | Function value : ", node.value)
-                solve_equation()
+            if node.function in context  and not isnumber(node.func_exp) and check_function(node.function, context[node.function], node.value):
+                return solve_equation(node)
             context[node.function] = node.value
             return  node.value
         elif node.type == 'FUNCTION_OPERATION':
@@ -205,7 +210,43 @@ def evaluator(ast, context, DEBUG=False):
         else:
             raise ValueError(f"Unknown node type: {node.type}")
 
+    def main_evaluator():
+        DEBUG and print(" | Evaluator input : ", ast)
+        result = evaluate_node(ast)
+        return context, result
+        
+    return main_evaluator()
+
+
+
+def isnumber(s):
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False
     
-    DEBUG and print(" | Evaluator input : ", ast)
-    result = evaluate_node(ast)
-    return context, result
+def get_variable_name(func_exp):
+    variable = ""
+    expression = func_exp.split()
+
+    for x in expression:
+        if x not in ['+', '-', '*', '/', '%', '^', '(', ')', ' ', '', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
+            variable = x
+            break
+    
+    if not variable:
+        raise ValueError(f"Function {func_exp} does not have a variable")
+
+    for x in expression:
+        if x not in ['+', '-', '*', '/', '%', '^', '(', ')', ' ', '', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
+            if variable != x:
+                raise ValueError(f"Function {func_exp} has multiple variables")
+            
+    return variable
+
+def check_function(func, func_exp, value):
+    variable_name = get_variable_name(func_exp)
+    if variable_name is None:
+        raise ValueError(f"Function {func} does not have a variable")
+    return variable_name
