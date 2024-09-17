@@ -1,229 +1,176 @@
 import re
-from fractions import Fraction
+# from fractions import Fraction
+from collections import defaultdict
 
-# play with console colors
-green = "\033[1;32;40m"
-red = "\033[1;31;40m"
-yellow = "\033[1;33;40m"
-bleu = "\033[1;34;40m"
-orange = "\033[1;35;40m" 
-reset = "\033[0;37;40m"
+# Define ANSI color codes for console output
+COLORS = {
+    'GREEN': '\033[1;32;40m',
+    'RED': '\033[1;31;40m',
+    'YELLOW': '\033[1;33;40m',
+    'BLUE': '\033[1;34;40m',
+    'ORANGE': '\033[1;35;40m',
+    'RESET': '\033[0;37;40m'
+}
 
+def print_error(msg):
+    print(COLORS['RED'], msg, COLORS['RESET'])
+    exit()
+
+def Handle_errors(equation):
+    if not re.match(r'^[X0-9\^\+\-\=\*\.\s]*$', equation):
+        print(f"{COLORS.red}Error: Invalid characters in the equation{COLORS.reset}")
+        exit(0)
+    if equation.find('=') == -1:
+        print(f"{COLORS.red}Error: this is not an equation{COLORS.reset}")
+        exit(0)
+    if equation.split('=')[1].strip() == "":
+        print(f"{COLORS.red}Error: Left-hand side of the equation is empty{COLORS.reset}")
+        exit(0)
+    if equation.split('=')[1].strip().find("X") == -1 and equation.split('=')[0].strip().find("x") == -1:
+        print(f"{COLORS.red}Error: Equation must contain an X variable{COLORS.reset}")
+        exit(0)
 
 class Polynomial:
 
-    def __init__(self) -> None:
+    def __init__(self, equation) -> None:
+        self.equation = equation
+
         self.lhs = ""
         self.rhs = ""
-
-        self.rhs_dict = {}
-        self.lhs_dict = {}
-        self.terms = {}
+        self.terms = defaultdict(tuple)
         self.degree = 0
         self.reduced_form = ""
         self.solutions = []
 
-    def get_degree(self):
-        self.degree = max([int(power) for power in self.reduced_form.keys()])
-        return self.degree
-
-    def get_solutions(self):
-        return self.solutions
-    
-    def print_reduced_form(self):
-        print(f"{yellow}> Reduced form : {green} [ ", end=f"")
-        for power, coef , i in zip(self.reduced_form.keys(), self.reduced_form.values(), range(len(self.reduced_form))):
-            print(f"{coef} * X^{power}", end="")
-            if i < len(self.reduced_form) - 1:
-                print(" + ", end="")
-        print(f" = 0 ] {reset}")
-
-    def extract_rhs_terms(self, rhs_parsed, DEBUG=False):
-        DEBUG and  print("\n > Parsing right-hand side terms..", self.rhs, "---------------->")
-        # multiply coef by -1 to get the reduced form
-        for i in range(len(rhs_parsed)):
-            # print("   *> Adding term:", rhs_parsed[i])
-            rhs_term = rhs_parsed[i].split('*')
-            if len(rhs_term) == 2:
-                coef = float(rhs_term[0])
-                if len(rhs_term[1].split('^')) == 2:
-                    power = rhs_term[1].split('^')[1]
-                else:
-                    print_error("Error Format : a * X^2 not followed in rhs -> "+ rhs_parsed[i])
-            else:
-                coef = float(rhs_term[1]) * -1
-                power = rhs_term[2].split('^')[1]
-            
-            self.rhs_dict[i] = (coef, power)
-        DEBUG and print(f"  -> rhs_dict[{len(self.rhs_dict)}]:", self.rhs_dict)
-
-    def extract_lhs_terms(self, DEBUG=False):
-        DEBUG and print("\n > Parsing left-hand side terms..", self.lhs, "------------->")
-        lhs_parsed = self.lhs.split('+')
-        lhs_parsed = [term.strip() for term in lhs_parsed if term.strip()]  # Remove empty spaces
-        terms = []
-        print
-
-        for i in range(len(lhs_parsed)):
-            lhs_term = lhs_parsed[i].split('-')
-            # print("   -> Adding term:", lhs_term)
-            for k in range(len(lhs_term)):
-                coef, power = 0, 0
-                # print("     -> lhs_term[", i + k, "]:", lhs_term[k])
-                lhs_parse_term = lhs_term[k].split('*')
-                lhs_parse_term = [term.strip() for term in lhs_parse_term if term.strip()]  # Remove empty spaces
-                # print("    -> lhs_parse", lhs_parse_term)
-                if len(lhs_parse_term) == 2 and lhs_parse_term[1].startswith('X') and k == 0:
-                    coef = float(lhs_parse_term[0])
-                    if len(lhs_parse_term[1].split('^')) == 2:
-                        power = lhs_parse_term[1].split('^')[1]
-                    else:
-                        print_error("Error Format : a * X^2 not followed in rhs -> "+ lhs_term[k])
-                elif len(lhs_parse_term) == 2 and i > 0:
-                    coef = float(lhs_parse_term[0]) * -1
-                    power = lhs_parse_term[1].split('^')[1]
-                else:
-                    print_error(" Term is not in the form a * X^b -> " + lhs_parse_term[k])
-                # print("     -> Coefficient:", coef, "Power:", power)
-                terms.append((coef, power))
-        # print(f"  -> lhs_dict[{len(terms)}]:", terms)
-        self.lhs_dict = terms
-
-    def parse_equation(self, equation, DEBUG=False):
-        print(f"{yellow}> Parsing equation : ", equation, f"{reset}")
-        try:
-            self.lhs, self.rhs = equation.split('=')
-        except ValueError:
-            raise ValueError("Error: Equation must contain an equal sign")
-
-        DEBUG and print(f"\n  -> Left-hand side:{yellow}", self.lhs, f"{reset}")
-        DEBUG and print(f"  -> Right-hand side:{yellow}", self.rhs, f"{reset}\n")
-
-        self.rhs = self.rhs.replace('-', '+ -')  # Handle minus signs on the right side
-        rhs_terms = self.rhs.split('+')
-        rhs_terms = [term.strip() for term in rhs_terms if term.strip()]  # Remove empty spaces
+        self.rhs_dict = {}
+        self.lhs_dict = {}
         
-        # print("  -> rhs_terms:", rhs_terms)
-        rhs_parsed = ['-1 * ' + term if not term.startswith('-') else term.replace('-', '') for term in rhs_terms]
-        DEBUG and print("  -> rhs extracted :", rhs_parsed)
+        self.complex = False
+        
+        self.parse_equation()
 
-        # Convert terms from the rhs and lhs sides into dict {power: coefficient} 
-        self.extract_rhs_terms(rhs_parsed)
-        self.extract_lhs_terms()
+    def parse_equation(self):
+        print(f"Equation: {self.equation}")
+        
+        if '=' not in self.equation: 
+            raise ValueError("Equation must contain an equal sign")
+        
+        parts = self.equation.split('=')
+        if len(parts) != 2:
+            raise ValueError("Equation must contain exactly one equal sign")
+        
+        self.lhs, self.rhs = map(str.strip, parts)
 
-    def transform_terms(self):
-        all_terms = self.lhs_dict + list(self.rhs_dict.values())
-        print("> Function terms:", all_terms)
+        # Negate the right-hand side by using a regex for term parsing
+        self.rhs = self.rhs.replace('-', '+-')
 
-        self.reduced_form = {}
-        for term in all_terms:
+        # Split by '+' to separate terms
+        rhs_terms = [term.strip() for term in self.rhs.split('+') if term.strip()]
+
+        # Negate each term of the RHS
+        negated_rhs_terms = []
+        for term in rhs_terms:
+            if term:
+                if term.startswith('-'):
+                    negated_rhs_terms.append(term[1:].strip())  # Remove leading minus
+                else:
+                    negated_rhs_terms.append('-' + term)  # Add leading minus
+
+        # Reconstruct the RHS
+        self.rhs = ' + '.join(negated_rhs_terms)
+        
+        # Extract terms and compute polynomial degree if necessary
+        self.extract_terms()
+    
+    def extract_terms(self):
+        self.equation = self.lhs + " + " + self.rhs
+        print(f"Equation: {self.equation} = 0")
+
+        for term in re.findall(r'([+-]?\s*\d*\.?\d*)\s*\*\s*X\^([+-]?\d+)', self.equation):
             coef, power = term
-            if power in self.reduced_form :
-                self.reduced_form [power] += coef
-            else:
-                self.reduced_form [power] = coef
-        print(f"> Transformed Function terms:{yellow}", self.reduced_form , f"{reset}")
+            coef = coef.replace(' ', '')
+            coef = float(coef) if coef and coef not in ['+', '-'] else 1.0
+            if coef == '-':
+                coef = -1.0
+            power = int(power)
+            self.terms[power] = self.terms.get(power, 0) + coef
+
+        # Compute the polynomial degree
+        self.degree = max(self.terms.keys())
+        # # Reduce the equation
+        self.reduce_equation()
+
+    def reduce_equation(self):
+        self.reduced_form = ' + '.join(f"{coef} * X^{power}" for power, coef in sorted(self.terms.items(), reverse=True))
+        self.reduced_form = self.reduced_form.replace(' + -', ' - ')
+        self.reduced_form = self.reduced_form.replace(' 1 * ', ' ')
+        self.reduced_form = self.reduced_form.replace(' * X^0', ' ')
+        self.reduced_form = self.reduced_form.replace(' * X^1', ' X')
+        self.reduced_form = self.reduced_form.replace(' * X^', ' X ^ ')
+        self.reduced_form = self.reduced_form.replace('  ', ' ')
+        self.reduced_form = self.reduced_form.strip()
+        self.degree = max(self.terms.keys())
 
     def solve(self):
-        print(f"{yellow}> Solving the equation : ", end="")
-        print(f"  -> Degree:{orange}", self.degree, f"{reset}", end="")
-        print(f" {yellow} -> Terms:{orange}", self.reduced_form, f"{reset}")
-        
-        print(f"{orange}> The solution is : ", end="")
-
-        if int(self.degree) == 0:
-
-            if self.reduced_form['0'] == 0:
-                self.solutions = "True"
-                print(f"{green}All real numbers are solutions")
+        if self.degree == 0:
+            if self.terms[0] == 0:
+                self.solutions = ["All real numbers are solutions."]
             else:
-                self.solutions = 'False'
-                print(f"{red}No solution for this equation")
-
-        if int(self.degree) == 1:
-            
-            if self.reduced_form['1'] == 0:
-                self.solutions = "No solution"
-                print(f"{red}No solution")
+                self.solutions = ["No solution."]
+        elif self.degree == 1:
+            a = self.terms.get(1, 0)
+            b = self.terms.get(0, 0)
+            if a == 0:
+                self.solutions = ["No solution."]
             else:
-                x = (-1 * float(self.reduced_form['0']) / float(self.reduced_form['1']))
-                self.solutions = x
-                # -> -1 * a0 / a1 
-                print(f" X = {green}",Fraction(self.solutions).limit_denominator() , " = ", x, f"{reset}")
-                return x
-
-        if int(self.degree) == 2:
-            # Calculate the discriminant : delta = b^2 - 4ac
-            delta = self.reduced_form["1"] ** 2 - 4 * self.reduced_form["2"] * self.reduced_form["0"]
-            print("\n> Delta:", delta, end=" -> ")
-
-            if delta > 0:
-                print("> Discriminant is strictly positive, the two solutions are: x1 = (-b + sqrt(delta) / 2a) and x2 = (-b - sqrt(delta) / 2a)")
-
-                # Convert solutions to irreducible fractions
-                self.solutions = [0, 0]
-                self.solutions[0] = (-self.reduced_form["1"] - delta ** 0.5) / (2 *  self.reduced_form["2"])
-                self.solutions[1] = (-self.reduced_form["1"] + delta ** 0.5) / (2 *  self.reduced_form["2"])
-
-                frac_x1 = Fraction(self.solutions[0]).limit_denominator()
-                frac_x2 = Fraction(self.solutions[1]).limit_denominator()
-                
-                print(f"{reset}x1 = {orange}",frac_x1 ,  " =  ", self.solutions[0], f"{reset}")
-                print(f"x2 = {orange}",frac_x2 , " =  ",self.solutions[1] ,f"{reset}")
-                return frac_x1, frac_x2
-            elif delta == 0:
-                print(f"{green}Discriminant is zero, the solution is: x = -b / 2a")
-                if self.reduced_form["2"] == 0:
-                    print(f"{green}Division by zero, there are no real solutions{reset}")
-                    return None
-                print(-self.reduced_form["1"] / (2 *  self.reduced_form["2"]))
-                self.solution[0] = -self.reduced_form["1"] / (2 *  self.reduced_form["2"])
-                return -self.reduced_form["1"] / (2 *  self.reduced_form["2"]), None    
-            elif delta < 0:
-                print(f"{orange}Discriminant is strictly negative, let's solve it with complex numbers")
-                real_part = -self.reduced_form["1"] / (2 * self.reduced_form["2"])
-                imaginary_part = (abs(delta) ** 0.5) / (2 * self.reduced_form["2"])
-                print(f"Complex solutions are:{green} x1 = {real_part} + {imaginary_part}i, x2 = {real_part} - {imaginary_part}i{reset}")
-                return (real_part, imaginary_part), (real_part, -imaginary_part)
-
-    def Handle_equation(self):
-        degree = self.get_degree()
-        if int(degree) > 2:
-            print(f"{red}> The polynomial degree is stricly greater than 2nd degree, I can't solve{reset}")
-            return None, None
+                self.solutions = [-b / a]
+        elif self.degree == 2:
+            a = self.terms.get(2, 0)
+            b = self.terms.get(1, 0)
+            c = self.terms.get(0, 0)
+            discriminant = b**2 - 4*a*c
+            if discriminant > 0:
+                root1 = (-b + discriminant**0.5) / (2*a)
+                root2 = (-b - discriminant**0.5) / (2*a)
+                self.solutions = [root1, root2]
+            elif discriminant == 0:
+                if a == 0:
+                    self.solutions = ["No solution."]
+                    return
+                root = -b / (2*a)
+                self.solutions = [root]
+            else:
+                real_part = -b / (2*a)
+                imaginary_part = (-discriminant)**0.5 / (2*a)
+                root1 = complex(real_part, imaginary_part)
+                root2 = complex(real_part, -imaginary_part)
+                self.solutions = [root1, root2]
+                self.complex = True
         else:
-            print(f"{green}> The polynomial degree is less than 2nd degree, I can solve{reset}")
-            self.solve()
-            return self.get_solutions()
+            self.solutions = ["The polynomial degree is strictly greater than 2, I can't solve."]
+    
+    def print_solution(self):
+        if len(self.solutions) == 1 and self.solutions[0] == "No solution.":
+            print("No solution.")
+        elif self.degree == 0:
+            print("All real numbers are solutions.")
+        elif self.degree == 1:
+            print(f"The solution is: {self.solutions[0]}")
+        elif self.degree == 2 and len(self.solutions) == 2:
+            print(f"Discriminant is strictly positive, the two solutions are: {self.solutions}")
+        elif self.degree == 2 and len(self.solutions) == 1:
+            print(f"Discriminant is equal to zero, the solution is: {self.solutions[0]}")
+        elif self.degree == 2 and self.complex:
+            print(f"Discriminant is strictly negative, the two complex solutions are: {self.solutions}")
+        else:
+            print("The polynomial degree is strictly greater than 2, I can't solve.")
 
+    def print_degree(self):
+        print("Polynomial degree: ", self.degree)
+    
 
-
-def print_error(msg):
-    print(red, msg,reset)
-    exit()
-
-def Handle_errors(equation):
-    # look for any invalid characters except X, ^, +, -, =, *, ., digits
-    if not re.match(r'^[X0-9\^\+\-\=\*\.\s]*$', equation):
-        print(f"{red}Error: Invalid characters in the equation{reset}")
-        exit(0)
-    if equation.find('=') == -1:
-        print(f"{red}Error: this is not an equation{reset}")
-        exit(0)
-    if equation.split('=')[1].strip() == "":
-        print(f"{red}Error: Left-hand side of the equation is empty{reset}")
-        exit(0)
-    if equation.split('=')[1].strip().find("X") == -1 and equation.split('=')[0].strip().find("x") == -1:
-        print(f"{red}Error: Equation must contain an X variable{reset}")
-        exit(0)
-
-def computorv1(equation, DEBUG=False):
-    validate_equation(equation)
-    p = Polynomial(equation)
-    solutions = p.solve()
-    p.print_solution()
-
-    return solutions
+    def print_reduced_form(self):
+        print("Reduced form: ", self.degree)
 
 def validate_equation(equation):
     if not re.match(r'^[X0-9\^\+\-\=\*\.\s]*$', equation):
@@ -235,50 +182,36 @@ def validate_equation(equation):
     if equation.split('=')[1].strip().find("X") == -1 and equation.split('=')[0].strip().find("x") == -1:
         print_error("Equation must contain an X variable")
 
-if __name__ == "__main__":
+def computorv1(equation, DEBUG=False):
+    validate_equation(equation)
+    p = Polynomial(equation)
+    p.solve()
+    p.print_degree()
+    p.print_reduced_form()
+    p.print_solution()
+    return p.solutions
 
-    # Test cases
-    # case 0 : second degree
-    print(computorv1("3 * X^2 + 5 * X^1 = 2 * X^0", DEBUG=False))
-    # Reduced form:  3.0 * X^2 + 5.0 * X^1 - 2.0 * X^0 = 0
-    # Polynomial degree: 2
-    # Discriminant is strictly positive, the two solutions are:
-    # -2, 1/3 
+# if __name__ == "__main__":
 
-    # print(computorv1("5 * X^0 + 4 * X^1 = 4 * X^0"))
-    # print(computorv1("8 * X^0 - 6 * X^1 + 0 * X^2 - 5.6 * X^3 = 3 * X^0"))
-    # print(computorv1("5 * X^0 = 154 * X^0"))
-    # print(computorv1("1 * X^2 + X^1 = 1 * X^2"))
-    # print(computorv1("1 * X^2 + 5 * X^1 = 1 "))
-    # print(computorv1("3 * X^2 + 5 * X^1 = 2 * X^0"))
+#     # Test cases
+#     # case 0 : second degree
+#     computorv1("3 * X^2 - 5 * X^1 = 2 * X^0 - 3 * X^2 + 2 * X^1 - 5 * X^0 - 5 * X^2", DEBUG=False)
+#     print("Case 0: ", 0.5, -1.0)
 
-    # Case 1:  second degree
-    # equation =  "5 * X^0 + 4 * X^1 - 9.3 * X^2 = 1 * X^0"
-    # Reduced form: 4 * X^0 + 4 * X^1 - 9.3 * X^2 = 0
-    # Polynomial degree: 2
-    # Discriminant is strictly positive, the two solutions are:
-    # 0.905239, -0.475131
-    
-    # Case 2: one degree
-    # equation =  "5 * X^0 + 4 * X^1 = 4 * X^0"
-    # Reduced form: 1 * X^0 + 4 * X^1 = 0
-    # Polynomial degree: 1
-    # The solution is: -0.25
+#     computorv1("5 * X^0 + 4 * X^1 - 9.3 * X^2 = 1 * X^0", DEBUG=False)
+#     print("Case 1: ", 0.905239, -0.475131)
 
-    # Case 3: greater than 2
-    # equation = "8 * X^0 - 6 * X^1 + 0 * X^2 - 5.6 * X^3 = 3 * X^0"
-    # Reduced form: 5 * X^0 - 6 * X^1 + 0 * X^2 - 5.6 * X^3 = 0
-    # Polynomial degree: 3
-    # The polynomial degree is strictly greater than 2, I can't solve.
+#     computorv1("5 * X^0 + 4 * X^1 = 4 * X^0", DEBUG=False)
+#     print("Case 2: ", -0.25)
 
-    # Case 4: zero degree
-    # equation = "5 * X^0 = 154 * X^0"
-    # Reduced form: 0 * X^0 = 0
-    # Polynomial degree: 0
-    # All real numbers are solutions.
+#     computorv1("8 * X^0 - 6 * X^1 + 0 * X^2 - 5.6 * X^3 = 3 * X^0", DEBUG=False)
+#     print("Case 3: ", "The polynomial degree is strictly greater than 2, I can't solve.")
 
-    # case 5 : error equation format : a X^2
-    # equation = "1 * X^2 + X^1 = 1 * X^2"
+#     computorv1("5 * X^0 = 154 * X^0", DEBUG=False)
+#     print("Case 4: ", "All real numbers are solutions.")
 
-    # case 6 : error equation format :1 
-    # equation = "1 * X^2 + 5 * X^1 = 1 "
+#     computorv1("1 * X^2 + X^1 = 1 * X^2", DEBUG=False)
+#     print("Case 5: ", "No solution.")
+
+#     computorv1("1 * X^2 + 5 * X^1 = 1", DEBUG=False)
+#     print("Equation must contain an X variable ")

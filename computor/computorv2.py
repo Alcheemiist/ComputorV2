@@ -12,12 +12,12 @@ def computorv2(user_input="", DEBUG=False):
 
     if user_input == "!all":
         if context:
-            print_color("HEADER", f"\n | <---  Variables and functions stored  --->") 
+            print_color("HEADER", "\n | <---  Variables and functions stored  --->") 
             for key, value in context.items():
                 print_color("OKCYAN", f"\n |> {key} = {value}")
-            print_color("HEADER", f"\n | <---------------------------------------->")
+            print_color("HEADER", "\n | <---------------------------------------->")
         else:
-            print_color("HEADER", f"\n |> No variables or functions stored yet.")
+            print_color("HEADER", "\n |> No variables or functions stored yet.")
         return "all variables and functions"
 
     try:
@@ -97,5 +97,5 @@ def test_case_main():
     print_color("HEADER", f"Result: {result}")
 
 if __name__ == "__main__":
-    main()
-    # test_case_main()
+    # main()
+    test_case_main()
