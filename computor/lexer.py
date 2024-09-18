@@ -15,8 +15,11 @@ COLORS = {
 
 token_patterns = [
     ('COMPLEX', r'\d+(\.\d*)?[ij]'),
-    
-    ('NUMBER', r'\d+(\.\d*)?'),
+    ('ERROR_DOUBLE_OPERATOR', r'[+\-*/%^]{2,}'),
+    ('ERROR_INVALID_NUMBER', r'\d+[a-zA-Z]+\d*'),
+    ('ERROR_INVALID_OPERATOR', r'[^+\-*/%^=(),\[\];?\s\d\w]+'),
+    ('NUMBER', r'\b\d+(\.\d*)?\b'),
+    ('ERROR', r'\d+[a-zA-Z0-9]+'),
     ('VARIABLE', r'[a-zA-Z][a-zA-Z0-9]*=?'),
     ('ADD', r'\+'),
     ('SUB', r'\-'),
@@ -34,8 +37,8 @@ token_patterns = [
     ('COMMA', r','),
     ('QUESTION', r'\?'),
     ('IMAGINARY', r'\d*i'),
-    ('FUNCTION', r'[a-zA-Z][a-zA-Z0-9]*\('),
-    ('MATRIX', r'\[[^\]]*\]')
+    ('FUNCTION', r'[a-zA-Z][a-zA-Z0-9]*\(\)'),
+    ('MATRIX', r'\[\[(\d+(\.\d*)?)(,\s*\d+(\.\d*)?)*\](;\s*\[\d+(\.\d*)?(,\s*\d+(\.\d*)?)*\])*\]')
 ]
 
 def test_color():
@@ -73,7 +76,7 @@ def lexer(input_string, DEBUG=False):
         try:
             match = token_re.match(input_string, pos)
             if not match:
-                print_color("WARNING"," | Lexer: Unexpected character found: " + input_string[pos], "\n")
+                print_color("WARNING"," | Lexer: Unexpected character found: " + input_string[pos] + "\n")
                 return []
         except ValueError as e:
             print_color("WARNING", f"Error: {e}\n")
@@ -86,6 +89,19 @@ def lexer(input_string, DEBUG=False):
         if token_type != 'WHITESPACE':
             tokens.append((token_type, token_value))
         pos = match.end()
+    
+    # Check for syntax errors
+    for i, (token_type, token_value) in enumerate(tokens):
+        if token_type == 'NUMBER':
+            # Check if the number is followed by an invalid character
+            if i + 1 < len(tokens):
+                next_token_type, next_token_value = tokens[i + 1]
+                if next_token_type == 'VARIABLE' and next_token_value[0].isdigit():
+                    raise ValueError(f"Invalid syntax: Number '{token_value}' is followed by an invalid identifier '{next_token_value}'")
+        elif token_type == 'VARIABLE':
+            # Check if the variable name starts with a digit
+            if token_value[0].isdigit():
+                raise ValueError(f"Invalid variable name: '{token_value}'. Variable names cannot start with a digit.")
     
     DEBUG and print_color("WARNING", " | Tokens: " + COLORS["UNDERLINE"]+ str(tokens))
     return tokens
