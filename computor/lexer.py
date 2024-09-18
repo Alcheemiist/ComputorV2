@@ -13,9 +13,9 @@ COLORS = {
     "RESET": "\033[0m"
 }
 
-# Define token patterns
 token_patterns = [
-    ('COMPLEX', r'\d+(\.\d*)?j'),
+    ('COMPLEX', r'\d+(\.\d*)?[ij]'),
+    
     ('NUMBER', r'\d+(\.\d*)?'),
     ('VARIABLE', r'[a-zA-Z][a-zA-Z0-9]*=?'),
     ('ADD', r'\+'),
@@ -61,7 +61,6 @@ def lexer(input_string, DEBUG=False):
     if not input_string:
         DEBUG and print_color("WARNING" ," | Lexer: Empty input")
 
-    
     # Compile regex pattern
     token_regex = '|'.join('(?P<%s>%s)' % pair for pair in token_patterns) 
     token_re = re.compile(token_regex)

@@ -131,8 +131,6 @@ def parser(tokens):
         else:
             raise ValueError(f"Unexpected token: {token}")
 
-    # advanced parser 
-
     def parse_matrix():
         if not tokens:
             raise ValueError("Unexpected end of input")
