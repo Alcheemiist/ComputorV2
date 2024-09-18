@@ -122,7 +122,7 @@ def evaluator(ast, context, DEBUG=False):
                 rexp += token + " "
                 continue
             elif node.variable == token:
-                if rhs[ rhs.index(token) + 1 ] != '^':
+                if len(rhs) - 1 <= rhs.index(token) + 1 or rhs[ rhs.index(token) + 1 ] != '^':
                     rexp += "1 * X^1 "
                 continue
             else:
@@ -141,7 +141,7 @@ def evaluator(ast, context, DEBUG=False):
                 lexp += token + " "
                 continue
             if node.variable == token:
-                if lhs[ lhs.index(token) + 1 ] != '^':
+                if len(lhs) - 1 <= lhs.index(token) + 1 or lhs[ lhs.index(token) + 1 ] != '^':
                     lexp += "1 * X^1 "
                 continue
             for n in token:
@@ -154,7 +154,7 @@ def evaluator(ast, context, DEBUG=False):
         DEBUG and print(" | Function lexp : ", lexp)
         return f"{rexp} = {lexp}"
 
-    def solve_equation(node, DEBGUG=False):
+    def solve_equation(node, DEBUG=False):
         if context[node.function]:
             node.variable = node.func_exp.strip()
             node.func_exp = context[node.function]
@@ -217,7 +217,7 @@ def evaluator(ast, context, DEBUG=False):
             return [[evaluate_node(cell) for cell in row] for row in node.value]
         elif node.type == 'FUNCTION':
             DEBUG and print(" | DEBUUG : ", node)
-            if node.function in context  and not isnumber(node.func_exp) and check_function(node.function, context[node.function], node.value):
+            if node.function in context  and not isnumber(node.func_exp) and check_function(node.function, context[node.function], node.value) and is_resignement(node, context[node.function], DEBUG):
                 return solve_equation(node)
             context[node.function] = node.value
             return  node.value
@@ -258,7 +258,7 @@ def get_variable_name(func_exp):
     expression = func_exp.split()
 
     for x in expression:
-        if x not in ['+', '-', '*', '/', '%', '^', '(', ')', ' ', '', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
+        if x not in ['+', '-', '*', '/', '%', '^', '(', ')', ' ', '', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] and not isnumber(x):
             variable = x
             break
     
@@ -266,14 +266,25 @@ def get_variable_name(func_exp):
         raise ValueError(f"Function {func_exp} does not have a variable")
 
     for x in expression:
-        if x not in ['+', '-', '*', '/', '%', '^', '(', ')', ' ', '', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
+        if x not in ['+', '-', '*', '/', '%', '^', '(', ')', ' ', '', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] and not isnumber(x):
             if variable != x:
-                raise ValueError(f"Function {func_exp} has multiple variables")
+                raise ValueError(f"Function {func_exp} has multiple variables : {variable} != {x}   ")
             
     return variable
 
 def check_function(func, func_exp, value):
     variable_name = get_variable_name(func_exp)
+    
     if variable_name is None:
         raise ValueError(f"Function {func} does not have a variable")
     return variable_name
+
+def is_resignement(node, func_exp, DEBUG=False):
+    expression = func_exp.split()
+    for x in expression:
+        if x not in ['+', '-', '*', '/', '%', '^', '(', ')', ' '] and not isnumber(x):
+            if node.variable == x:
+                return True
+    return False
+    DEBUG and print(" | node : ", node)
+    DEBUG and print(" | func_exp : ", func_exp)

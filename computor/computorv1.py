@@ -170,7 +170,7 @@ class Polynomial:
     
 
     def print_reduced_form(self):
-        print("Reduced form: ", self.degree)
+        print("Reduced form: ", self.reduced_form)
 
 def validate_equation(equation):
     if not re.match(r'^[X0-9\^\+\-\=\*\.\s]*$', equation):

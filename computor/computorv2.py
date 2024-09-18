@@ -66,7 +66,7 @@ def test_case_main():
     # input = "a = [ [1,2,3] ;[4,5,6] ;[7,8,9] ] + [[10, 11, 12]; [13, 14, 15]; [16, 17, 18]"
 
 
-    input = "AA(y) = y + 2 + y + 3"
+    input = "AA(y) = 10 * 21 + y"
 
     print_color( "WARNING", f"Input: {input}")
     tokens  = lexer(input, DEBUG=True)
@@ -76,7 +76,9 @@ def test_case_main():
     context, result = evaluator(ast, context, DEBUG=True)
     print_color("HEADER", f"Result: {result}")
 
-    input1 = "r = 1"
+    print_color("OKBLUE", "----------------------------------")
+    
+    input1 = "AA(y) = 9 + y"
 
     print_color( "WARNING", f"Input: {input1}")
     tokens  = lexer(input1, DEBUG=True)
@@ -86,15 +88,6 @@ def test_case_main():
     context, result = evaluator(ast, context, DEBUG=True)
     print_color("HEADER", f"Result: {result}")
 
-    input2 = "AA(y) = 10"
-
-    print_color( "WARNING", f"Input: {input2}")
-    tokens  = lexer(input2, DEBUG=True)
-    ast     = parser(tokens)
-    print_color("HEADER", f"AST: {ast} | value {ast.value}")
-    print_color("HEADER", f"Context: {context}")
-    context, result = evaluator(ast, context, DEBUG=True)
-    print_color("HEADER", f"Result: {result}")
 
 if __name__ == "__main__":
     # main()
