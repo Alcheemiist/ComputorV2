@@ -168,7 +168,6 @@ class Polynomial:
     def print_degree(self):
         print("Polynomial degree: ", self.degree)
     
-
     def print_reduced_form(self):
         print("Reduced form: ", self.reduced_form)
 

@@ -213,7 +213,9 @@ def evaluator(ast, context, DEBUG=False):
             return complex(0, int(value))
         elif node.type == 'VARIABLE':
             if node.value not in context:
-                raise ValueError(f"Undefined variable: {node.value}")
+                print(ValueError(f"Undefined variable: {node.value}"))
+                return None
+            
             return context[node.value]
         elif node.type == 'OPERATOR':
             left = evaluate_node(node.left)
@@ -271,6 +273,8 @@ def evaluator(ast, context, DEBUG=False):
             ast     = parser(tokens)
             context_, result = evaluator(ast, context, DEBUG)
             return result
+        elif node.type == 'QUESTION':
+            return node.value
         else:
             raise ValueError(f"Unknown node type: {node.type}")
 

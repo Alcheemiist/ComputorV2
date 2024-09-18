@@ -94,7 +94,7 @@ def parser(tokens):
             raise ValueError("Unexpected end of input")
         token = tokens.pop(0)
         if token[0] == 'NUMBER':
-
+            print("number", token)
             number = None
             if '.' in token[1]:
                 number = float(token[1])
@@ -125,9 +125,12 @@ def parser(tokens):
                 raise ValueError("Missing closing bracket for matrix")
             return expr
         elif token[0] == 'VARIABLE':
+            print("variable", token)
             return ASTNode('VARIABLE', token[1])
         elif token[0] == 'FUNCTION':
             return ASTNode('FUNCTION', function=token[1], value=expr, func_exp=parse_expression())
+        elif token[0] == 'QUESTION':
+            return ASTNode('QUESTION', value=token[1])
         else:
             raise ValueError(f"Unexpected token: {token}")
 
