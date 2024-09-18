@@ -46,9 +46,41 @@ class ASTNode:
     def __repr__(self):
         return str(self)
 
-def parser(tokens):
+def parser(tokens, context):
     def parse_expression():
         return parse_assignment()
+
+    def question_value():
+        print("here : ", tokens)
+
+        for i, token in enumerate(tokens):
+            if token[0] == 'QUESTION':
+                if i > 1 and tokens[i-1][0] == 'EQUAL' and tokens[i-2][0] == 'VARIABLE' or i > 4 and tokens[i-1][0] == 'EQUAL' and tokens[i-3][0] == 'RPAREN' and tokens[i-4][0] == 'VARIABLE' and tokens[i-5][0] == 'LPAREN' and tokens[i-5][0] == 'VARIABLE':
+                    variable_name = tokens[i-2][1]
+                    if variable_name in context:
+                        value = context[variable_name]
+
+                        if isinstance(value, str):
+                            # Assuming the function is in the form of a string expression
+                            variables = [v.strip() for v in value.split() if v.strip().isalnum() and not v.strip().isdigit()]
+                            for var in variables:
+                                if var in context:
+                                    value = value.replace(var, str(context[var]))
+                            try:
+                                result = eval(value)
+                                return result
+                            except:
+                                return value  # If evaluation fails, return the original expression
+                        else:
+                            return value  # If it's not a string (function), return as is
+
+                        return context[variable_name]
+                    else:
+                        raise ValueError(f"Variable '{variable_name}' not found")
+                else:
+                    raise ValueError("Question mark must follow a variable assignment (e.g., 'x = ?')")
+        return None  # If no question mark is found
+
 
     def parse_assignment():
         left = parse_addition()
@@ -90,11 +122,11 @@ def parser(tokens):
         return parse_primary()
 
     def parse_primary():
+        print("Parse : ", tokens)
         if not tokens:
             raise ValueError("Unexpected end of input")
         token = tokens.pop(0)
         if token[0] == 'NUMBER':
-            print("number", token)
             number = None
             if '.' in token[1]:
                 number = float(token[1])
@@ -105,6 +137,8 @@ def parser(tokens):
         elif token[0] == 'COMPLEX':
             return ASTNode('COMPLEX', token[1])  # Directly create a complex node
         elif token[0] == 'VARIABLE' and tokens and tokens[0][0] != 'LPAREN':
+            if token[1] == "i" or token[1] == "j":
+                raise ValueError(" i and j are reserved for complex numbers")
             return ASTNode('VARIABLE', token[1])
         elif token[0] == 'VARIABLE' and tokens and tokens[0][0] == 'LPAREN':
             expr = parse_function()  # Parse the inner expression
@@ -121,15 +155,22 @@ def parser(tokens):
             return expr
         elif token[0] == 'LBRACKET':
             expr = parse_matrix()
+            print("matrix", expr)
+            print("matrix", expr.value)
+            print("matrix", expr.type)
+            print(tokens)            
             if not tokens or tokens.pop(0)[0] != 'RBRACKET':
                 raise ValueError("Missing closing bracket for matrix")
             return expr
         elif token[0] == 'VARIABLE':
-            print("variable", token)
+            if token[1] == "i" or token[1] == "j":
+                raise ValueError(" i and j are reserved for complex numbers")
+
             return ASTNode('VARIABLE', token[1])
         elif token[0] == 'FUNCTION':
             return ASTNode('FUNCTION', function=token[1], value=expr, func_exp=parse_expression())
         elif token[0] == 'QUESTION':
+            
             return ASTNode('QUESTION', value=token[1])
         else:
             raise ValueError(f"Unexpected token: {token}")
@@ -184,6 +225,9 @@ def parser(tokens):
                 raise ValueError(f"Missing closing parenthesis for function {func_name}")
         return args[0]
 
+    result = question_value()
+    if result:
+        return ASTNode('NUMBER', result)
     ast = parse_expression()
     return ast
 
