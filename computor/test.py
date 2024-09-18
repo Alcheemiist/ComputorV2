@@ -120,8 +120,16 @@ class TestComputorv2(unittest.TestCase):
     def test_complex_assignment(self):
         self.assertEqual(str(self.computor("varD = 2j + 3")), "(3+2j)")
         self.assertEqual(str(self.computor("varE = -4j - 4")), "(-4-4j)")
-        pass
-    
+        self.assertEqual(str(self.computor("varE = 2j + 3")), "(3+2j)")
+        self.assertEqual(str(self.computor("varE = 2j - 3")), "(-3+2j)")
+        self.assertEqual(str(self.computor("varE = 2j * 3")), "6j")
+        self.assertEqual(str(self.computor("varE + varD")), "(3+8j)")
+        self.assertEqual(str(self.computor("varE - varD")), "(-3+4j)")
+        self.assertEqual(str(self.computor("varE * varD")), "(-12+18j)")
+        self.assertEqual(str(self.computor("varR = 2 + 5i")), "(2+5j)")
+        self.assertEqual(str(self.computor("varR = 2 - 5i")), "(2-5j)")
+        self.assertEqual(str(self.computor("varR = 2 * 5i")), "10j")
+
     def test_matrix_assignment(self):
         self.assertEqual((self.computor("matA = [[2,3];[4,3]]")), [[2,3],[4,3]])
         self.assertEqual((self.computor("matB = [[3,4]]")), [[3, 4]])
