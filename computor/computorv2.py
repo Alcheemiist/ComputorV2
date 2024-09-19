@@ -28,7 +28,7 @@ def computorv2(user_input="", DEBUG=False, Raise_flag=False):
             print_color("FAIL", "FAIL: Invalid input")
             if Raise_flag:
                 raise ValueError("Invalid input")
-        ast     = parser(tokens)
+        ast     = parser(tokens, context)
         if not ast:
             print_color("FAIL", "FAIL: Invalid AST")
             if Raise_flag:
@@ -114,10 +114,60 @@ def test_case_complex():
         print_color("HEADER", f"Result: {result}")
         print_color("OKBLUE", "----------------------------------")
 
+def test_function_and_matrix_errors():
+    global context
 
+    # inputs = ["AA(y = 10 + x", "[1, 2, 3]", "[[1, 2, 3], [4, 5, 6]]", "[[1, 2, 3], [[4, 5, 6]]", ]
+    inputs = ["[1, 2, 3]", "[[1, 2, 3], [4, 5, 6]]", "[[1, 2, 3], [[4, 5, 6]]", ]
+    inputs = ["[[1, 2, 3][1,2,2]]", ]
+
+    for input in inputs:
+        res = computorv2(input, DEBUG=True, Raise_flag=False)  
+        print_color("HEADER", f"Result: {res}")
+        print_color("OKBLUE", "----------------------------------")
+
+def test_case():
+    global context
+
+    input = "f(x) = 10 * 21 + x"
+    res = computorv2(input, DEBUG=True, Raise_flag=False)  
+    print_color("HEADER", f"Result: {res}")
+    print_color("OKBLUE", "----------------------------------")
+
+    input = "T  = f(x)"
+    res = computorv2(input, DEBUG=True, Raise_flag=False)  
+    print_color("HEADER", f"Result: {res}")
+    print_color("OKBLUE", "----------------------------------")
+
+    input = "T = f(10)"
+    res = computorv2(input, DEBUG=True, Raise_flag=False)  
+    print_color("HEADER", f"Result: {res}")
+    print_color("OKBLUE", "----------------------------------")
+
+
+def test_question_mark():
+    global context
+
+    input = "X = 69"
+    res = computorv2(input, DEBUG=True, Raise_flag=False)  
+    print_color("HEADER", f"Result: {res}")
+    print_color("OKBLUE", "----------------------------------")
+
+    input = "X = ?"
+    res = computorv2(input, DEBUG=True, Raise_flag=False)  
+    print_color("HEADER", f"Result: {res}")
+    print_color("OKBLUE", "----------------------------------")
+
+    # input = "F = ?"
+    # res = computorv2(input, DEBUG=True, Raise_flag=False)  
+    # print_color("HEADER", f"Result: {res}")
+    # print_color("OKBLUE", "----------------------------------")
 
 
 if __name__ == "__main__":
-    main()
+    # main()
+    test_question_mark()
+    # test_case()
     # test_case_function()
     # test_case_complex()
+    # test_function_and_matrix_errors()

@@ -102,6 +102,21 @@ def lexer(input_string, DEBUG=False):
             # Check if the variable name starts with a digit
             if token_value[0].isdigit():
                 raise ValueError(f"Invalid variable name: '{token_value}'. Variable names cannot start with a digit.")
+        elif token_type == 'LPAREN':
+            print("LPAREN", token_value)
+            found_flag = False
+            for j in range(i, len(tokens)):
+                if tokens[i + j - 1][0] == 'RPAREN':
+                    print("RPAREN", tokens[i][1])
+                    found_flag = True
+                    break
+            if not found_flag:
+                print_color("WARNING", f"Invalid syntax: Missing closing parenthesis for '{token_value}'")
+                return None
+            
+
+        elif token_type == 'RPAREN':
+            print("RPAREN", token_value)
     
     DEBUG and print_color("WARNING", " | Tokens: " + COLORS["UNDERLINE"]+ str(tokens))
     return tokens
