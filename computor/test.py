@@ -228,7 +228,8 @@ class TestComputorv2(unittest.TestCase):
         
         # Test with functions
         self.computor("f(y) = y * 2 + 1")
-        # self.assertEqual(self.computor("f(3) ?"), 7)
+        self.assertEqual(self.computor("f(3) = ?"), 7)
+        # self.assertEqual(self.computor("A(2) + B(4)"), 41)
         
         # Test with matrices
         self.computor("matA = [[1,2];[3,4]]")

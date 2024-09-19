@@ -148,9 +148,22 @@ def parser(tokens, context):
             return ASTNode('VARIABLE', token[1])
         elif token[0] == 'VARIABLE' and tokens and tokens[0][0] == 'LPAREN':
             expr = parse_function()  # Parse the inner expression
+
             if "=" not in expr:
+                print("tokens : ", tokens)
+                print("node : ", token)
+                print("expression : ", expr)
+                print(" token 1 : ", token[1])
+                exit()
                 # res = handle_function_operation(token[1])
                 return ASTNode('QUESTION', value=token[1])
+            
+
+
+
+
+
+
             var_expr = expr.split("=")[0].strip().strip("()")
             expr = expr.split("=")[1].strip()
             return ASTNode('FUNCTION', function=token[1], value=expr, func_exp=var_expr)
@@ -161,10 +174,6 @@ def parser(tokens, context):
             return expr
         elif token[0] == 'LBRACKET':
             expr = parse_matrix()
-            print("matrix", expr)
-            print("matrix", expr.value)
-            print("matrix", expr.type)
-            print(tokens)            
             if not tokens or tokens.pop(0)[0] != 'RBRACKET':
                 raise ValueError("Missing closing bracket for matrix")
             return expr
@@ -215,6 +224,7 @@ def parser(tokens, context):
         if not tokens:
             raise ValueError("Unexpected end of input")
         func_str = ""
+        parenthese = [False, False]
         for token in tokens:
             func_str += token[1] + " "
         return func_str

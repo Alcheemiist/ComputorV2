@@ -165,7 +165,17 @@ def test_question_mark():
 def test_function():
     global context
 
-    input = "funB(y) = 43 * y / (4 % 2 * y)"
+    input = "funB(y) = 40 +  y"
+    res = computorv2(input, DEBUG=True, Raise_flag=False)  
+    print_color("HEADER", f"Result: {res}")
+    print_color("OKBLUE", "----------------------------------")
+
+    input = "funA(x) = x - 45"
+    res = computorv2(input, DEBUG=True, Raise_flag=False)  
+    print_color("HEADER", f"Result: {res}")
+    print_color("OKBLUE", "----------------------------------")
+
+    input = "funB(1) - funA(1)"
     res = computorv2(input, DEBUG=True, Raise_flag=False)  
     print_color("HEADER", f"Result: {res}")
     print_color("OKBLUE", "----------------------------------")
