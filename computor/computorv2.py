@@ -126,8 +126,48 @@ def test_function_and_matrix_errors():
         print_color("HEADER", f"Result: {res}")
         print_color("OKBLUE", "----------------------------------")
 
+def test_case():
+    global context
+
+    input = "f(x) = 10 * 21 + x"
+    res = computorv2(input, DEBUG=True, Raise_flag=False)  
+    print_color("HEADER", f"Result: {res}")
+    print_color("OKBLUE", "----------------------------------")
+
+    input = "T  = f(x)"
+    res = computorv2(input, DEBUG=True, Raise_flag=False)  
+    print_color("HEADER", f"Result: {res}")
+    print_color("OKBLUE", "----------------------------------")
+
+    input = "T = f(10)"
+    res = computorv2(input, DEBUG=True, Raise_flag=False)  
+    print_color("HEADER", f"Result: {res}")
+    print_color("OKBLUE", "----------------------------------")
+
+
+def test_question_mark():
+    global context
+
+    input = "X = 69"
+    res = computorv2(input, DEBUG=True, Raise_flag=False)  
+    print_color("HEADER", f"Result: {res}")
+    print_color("OKBLUE", "----------------------------------")
+
+    input = "X = ?"
+    res = computorv2(input, DEBUG=True, Raise_flag=False)  
+    print_color("HEADER", f"Result: {res}")
+    print_color("OKBLUE", "----------------------------------")
+
+    # input = "F = ?"
+    # res = computorv2(input, DEBUG=True, Raise_flag=False)  
+    # print_color("HEADER", f"Result: {res}")
+    # print_color("OKBLUE", "----------------------------------")
+
+
 if __name__ == "__main__":
-    main()
+    # main()
+    test_question_mark()
+    # test_case()
     # test_case_function()
     # test_case_complex()
     # test_function_and_matrix_errors()

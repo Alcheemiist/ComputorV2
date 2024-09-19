@@ -50,8 +50,17 @@ def parser(tokens, context):
     def parse_expression():
         return parse_assignment()
 
+    def find_mark():
+        for i, token in enumerate(tokens):
+            if token[0] == 'QUESTION':
+                return True
+        return False
+
     def question_value():
         print("here : ", tokens)
+
+        if  find_mark():
+            return None
 
         for i, token in enumerate(tokens):
             if token[0] == 'QUESTION':
@@ -80,7 +89,6 @@ def parser(tokens, context):
                 else:
                     raise ValueError("Question mark must follow a variable assignment (e.g., 'x = ?')")
         return None  # If no question mark is found
-
 
     def parse_assignment():
         left = parse_addition()
@@ -143,8 +151,8 @@ def parser(tokens, context):
         elif token[0] == 'VARIABLE' and tokens and tokens[0][0] == 'LPAREN':
             expr = parse_function()  # Parse the inner expression
             if "=" not in expr:
-                res = handle_function_operation(token[1])
-                return ASTNode('FUNCTION_OPERATION', function=token[1], value=res)
+                # res = handle_function_operation(token[1])
+                return ASTNode('QUESTION', value=token[1])
             var_expr = expr.split("=")[0].strip().strip("()")
             expr = expr.split("=")[1].strip()
             return ASTNode('FUNCTION', function=token[1], value=expr, func_exp=var_expr)
@@ -170,7 +178,6 @@ def parser(tokens, context):
         elif token[0] == 'FUNCTION':
             return ASTNode('FUNCTION', function=token[1], value=expr, func_exp=parse_expression())
         elif token[0] == 'QUESTION':
-            
             return ASTNode('QUESTION', value=token[1])
         else:
             raise ValueError(f"Unexpected token: {token}")
@@ -223,6 +230,7 @@ def parser(tokens, context):
                 args.append(parse_expression())
             if not tokens or tokens.pop(0)[0] != 'RPAREN':
                 raise ValueError(f"Missing closing parenthesis for function {func_name}")
+        
         return args[0]
 
     result = question_value()

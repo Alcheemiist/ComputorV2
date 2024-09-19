@@ -33,7 +33,6 @@ def get_variable_name(func_exp):
 
 def check_function(func, func_exp, value):
     variable_name = get_variable_name(func_exp)
-    
     if variable_name is None:
         raise ValueError(f"Function {func} does not have a variable")
     return variable_name
@@ -45,8 +44,6 @@ def is_resignement(node, func_exp, DEBUG=False):
             if node.variable == x:
                 return True
     return False
-    DEBUG and print(" | node : ", node)
-    DEBUG and print(" | func_exp : ", func_exp)
 
 def is_complex(value):
     if 'i' in value or 'j' in value:
@@ -213,7 +210,7 @@ def evaluator(ast, context, DEBUG=False):
             return complex(0, int(value))
         elif node.type == 'VARIABLE':
             if node.value not in context:
-                print(ValueError(f"Undefined variable: {node.value}"))
+                raise ValueError(f"Undefined variable: {node.value}")
                 return None
             
             return context[node.value]
@@ -244,6 +241,8 @@ def evaluator(ast, context, DEBUG=False):
                 raise ValueError(f"Unknown operator: {node.value}")
         elif node.type == 'ASSIGNMENT':
             value = evaluate_node(node.right)
+            if value == 'QUESTION':
+                return context[node.left.value]
             if node.left.type == 'NUMBER':
                 raise ValueError("Cannot assign value to a number")
             if node.left.type == 'OPERATOR':
@@ -261,6 +260,8 @@ def evaluator(ast, context, DEBUG=False):
             context[node.function] = node.value
             return  node.value
         elif node.type == 'FUNCTION_OPERATION':
+         
+
             if node.function not in context:
                 raise ValueError(f"Undefined function: {node.function}")
             node.func_exp = context[node.function]
@@ -268,13 +269,14 @@ def evaluator(ast, context, DEBUG=False):
                 if x not in ['+', '-', '*', '/', '%', '^', '(', ')', ' ', '', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
                     node.variable = x
                     break
+
             node.func_exp = node.func_exp.replace(node.variable, str(node.value.value))
             tokens  = lexer(node.func_exp, DEBUG)
-            ast     = parser(tokens)
+            ast     = parser(tokens, context)
             context_, result = evaluator(ast, context, DEBUG)
             return result
         elif node.type == 'QUESTION':
-            return node.value
+            return "QUESTION"
         else:
             raise ValueError(f"Unknown node type: {node.type}")
 
