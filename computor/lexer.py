@@ -59,13 +59,14 @@ def print_color(color, text):
 def lexer(input_string, DEBUG=False):
     input_string = input_string.strip()
 
-    DEBUG and print_color("WARNING", "\n | Input Lexer: " + input_string)
+    DEBUG and print_color("WARNING", f"\n | Input Lexer: {input_string}")
 
     if not input_string:
-        DEBUG and print_color("WARNING" ," | Lexer: Empty input")
+        DEBUG and print_color("WARNING", " | Lexer: Empty input")
+        return []
 
     # Compile regex pattern
-    token_regex = '|'.join('(?P<%s>%s)' % pair for pair in token_patterns) 
+    token_regex = '|'.join(f'(?P<{name}>{pattern})' for name, pattern in token_patterns)
     token_re = re.compile(token_regex)
     
     # Tokenize the input string
@@ -73,14 +74,9 @@ def lexer(input_string, DEBUG=False):
     pos = 0
             
     while pos < len(input_string):
-        try:
-            match = token_re.match(input_string, pos)
-            if not match:
-                print_color("WARNING"," | Lexer: Unexpected character found: " + input_string[pos] + "\n")
-                return []
-        except ValueError as e:
-            print_color("WARNING", f"Error: {e}\n")
-            not DEBUG and exit(1)
+        match = token_re.match(input_string, pos)
+        if not match:
+            print_color("WARNING", f" | Lexer: Unexpected character found: {input_string[pos]}\n")
             return []
             
         token_type = match.lastgroup
@@ -88,8 +84,14 @@ def lexer(input_string, DEBUG=False):
         
         if token_type != 'WHITESPACE':
             tokens.append((token_type, token_value))
+        
         pos = match.end()
+
+    DEBUG and print_color("WARNING", f" | Tokens: {tokens}")
     
+    # Initialize a stack to keep track of parentheses
+    paren_stack = []
+
     # Check for syntax errors
     for i, (token_type, token_value) in enumerate(tokens):
         if token_type == 'NUMBER':
@@ -103,20 +105,16 @@ def lexer(input_string, DEBUG=False):
             if token_value[0].isdigit():
                 raise ValueError(f"Invalid variable name: '{token_value}'. Variable names cannot start with a digit.")
         elif token_type == 'LPAREN':
-            print("LPAREN", token_value)
-            found_flag = False
-            for j in range(i, len(tokens)):
-                if tokens[i + j - 1][0] == 'RPAREN':
-                    print("RPAREN", tokens[i][1])
-                    found_flag = True
-                    break
-            if not found_flag:
-                print_color("WARNING", f"Invalid syntax: Missing closing parenthesis for '{token_value}'")
-                return None
-            
-
+            paren_stack.append(i)
         elif token_type == 'RPAREN':
-            print("RPAREN", token_value)
-    
+            if not paren_stack:
+                raise ValueError(f"Invalid syntax: Unmatched closing parenthesis at position {i}")
+            paren_stack.pop()
+
+    # Check for unmatched opening parentheses
+    if paren_stack:
+        raise ValueError(f"Invalid syntax: Missing closing parenthesis for opening parenthesis at position {paren_stack[0]}")
+
+    DEBUG and print_color("WARNING", " | Syntax check passed")
     DEBUG and print_color("WARNING", " | Tokens: " + COLORS["UNDERLINE"]+ str(tokens))
     return tokens

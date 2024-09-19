@@ -2,7 +2,6 @@ from lexer import lexer
 from parser import parser
 from computorv1 import computorv1
 
-
 # --------- helper ------------- #  
 
 def isnumber(s):
@@ -144,6 +143,22 @@ def evaluator(ast, context, DEBUG=False):
         else:
             raise ValueError(f"Unknown matrix operator: {operator}")
 
+    def handle_equation(node):
+        print("expression : ", context[node.function])
+        print("variable : ", get_variable_name(context[node.function]))
+        print(node.func_exp)
+        variable = get_variable_name(context[node.function])
+        expression =  context[node.function].replace(variable, node.func_exp.strip())
+
+        print(" calculate : ",expression)
+        tokens  = lexer(expression, DEBUG)
+        ast     = parser(tokens, context)
+        context_, result = evaluator(ast, context, DEBUG)
+        return result 
+        
+        exit()
+    
+    
     def validate_function(node, DEBUG=False):
         if DEBUG:
             print(" | Context : ", context)
@@ -171,7 +186,6 @@ def evaluator(ast, context, DEBUG=False):
         # ------------------- #
         lexp = ""
         for token in lhs:
-            print(token)
             token = token
             if token in ['+', '-', '*', '/', '%', '^']:
                 lexp += token + " "
@@ -211,8 +225,6 @@ def evaluator(ast, context, DEBUG=False):
         elif node.type == 'VARIABLE':
             if node.value not in context:
                 raise ValueError(f"Undefined variable: {node.value}")
-                return None
-            
             return context[node.value]
         elif node.type == 'OPERATOR':
             left = evaluate_node(node.left)
@@ -242,6 +254,8 @@ def evaluator(ast, context, DEBUG=False):
         elif node.type == 'ASSIGNMENT':
             value = evaluate_node(node.right)
             if value == 'QUESTION':
+                if node.left.value not in context:
+                    raise ValueError(" Variable undefined !")
                 return context[node.left.value]
             if node.left.type == 'NUMBER':
                 raise ValueError("Cannot assign value to a number")
@@ -257,6 +271,10 @@ def evaluator(ast, context, DEBUG=False):
             DEBUG and print(" | DEBUG : ", node)
             if node.function in context  and not isnumber(node.func_exp) and check_function(node.function, context[node.function], node.value) and is_resignement(node, context[node.function], DEBUG):
                 return solve_equation(node)
+            if node.value == "?":
+                if isnumber(node.func_exp):
+                    return handle_equation(node)
+                return context[node.function]
             context[node.function] = node.value
             return  node.value
         elif node.type == 'FUNCTION_OPERATION':
