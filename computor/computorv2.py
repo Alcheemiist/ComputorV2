@@ -144,7 +144,6 @@ def test_case():
     print_color("HEADER", f"Result: {res}")
     print_color("OKBLUE", "----------------------------------")
 
-
 def test_question_mark():
     global context
 
@@ -158,15 +157,25 @@ def test_question_mark():
     print_color("HEADER", f"Result: {res}")
     print_color("OKBLUE", "----------------------------------")
 
-    # input = "F = ?"
-    # res = computorv2(input, DEBUG=True, Raise_flag=False)  
-    # print_color("HEADER", f"Result: {res}")
-    # print_color("OKBLUE", "----------------------------------")
+    input = "F = ?"
+    res = computorv2(input, DEBUG=True, Raise_flag=False)  
+    print_color("HEADER", f"Result: {res}")
+    print_color("OKBLUE", "----------------------------------")
+
+def test_function():
+    global context
+
+    input = "funB(y) = 43 * y / (4 % 2 * y)"
+    res = computorv2(input, DEBUG=True, Raise_flag=False)  
+    print_color("HEADER", f"Result: {res}")
+    print_color("OKBLUE", "----------------------------------")
+
 
 
 if __name__ == "__main__":
     # main()
-    test_question_mark()
+    test_function()
+    # test_question_mark()
     # test_case()
     # test_case_function()
     # test_case_complex()

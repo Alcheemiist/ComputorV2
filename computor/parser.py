@@ -57,11 +57,10 @@ def parser(tokens, context):
         return False
 
     def question_value():
-        print("here : ", tokens)
-
         if  find_mark():
             return None
-
+        return 
+        raise ValueError(" NOT IMPLEMENTED QUESTION VALUE")
         for i, token in enumerate(tokens):
             if token[0] == 'QUESTION':
                 if i > 1 and tokens[i-1][0] == 'EQUAL' and tokens[i-2][0] == 'VARIABLE' or i > 4 and tokens[i-1][0] == 'EQUAL' and tokens[i-3][0] == 'RPAREN' and tokens[i-4][0] == 'VARIABLE' and tokens[i-5][0] == 'LPAREN' and tokens[i-5][0] == 'VARIABLE':
@@ -130,7 +129,6 @@ def parser(tokens, context):
         return parse_primary()
 
     def parse_primary():
-        print("Parse : ", tokens)
         if not tokens:
             raise ValueError("Unexpected end of input")
         token = tokens.pop(0)
@@ -177,8 +175,9 @@ def parser(tokens, context):
             return ASTNode('VARIABLE', token[1])
         elif token[0] == 'FUNCTION':
             return ASTNode('FUNCTION', function=token[1], value=expr, func_exp=parse_expression())
-        elif token[0] == 'QUESTION':
-            return ASTNode('QUESTION', value=token[1])
+        # elif token[0] == 'QUESTION':
+        #     tokens.pop(0)
+
         else:
             raise ValueError(f"Unexpected token: {token}")
 

@@ -211,8 +211,6 @@ def evaluator(ast, context, DEBUG=False):
         elif node.type == 'VARIABLE':
             if node.value not in context:
                 raise ValueError(f"Undefined variable: {node.value}")
-                return None
-            
             return context[node.value]
         elif node.type == 'OPERATOR':
             left = evaluate_node(node.left)
@@ -242,6 +240,8 @@ def evaluator(ast, context, DEBUG=False):
         elif node.type == 'ASSIGNMENT':
             value = evaluate_node(node.right)
             if value == 'QUESTION':
+                if node.left.value not in context:
+                    raise ValueError(" Variable undefined !")
                 return context[node.left.value]
             if node.left.type == 'NUMBER':
                 raise ValueError("Cannot assign value to a number")
