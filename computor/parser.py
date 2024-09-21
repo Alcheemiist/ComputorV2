@@ -1,3 +1,5 @@
+import re
+from lexer import lexer
 
 class ASTNode:
     def __init__(self, type, value=None, left=None, right=None, matrix=None, function=None, func_exp=None, variable=None):
@@ -46,6 +48,32 @@ class ASTNode:
     def __repr__(self):
         return str(self)
 
+def isnumber(s):
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False
+
+def get_variable_name(func_exp):
+    variable = ""
+    expression = func_exp.split()
+
+    for x in expression:
+        if x not in ['+', '-', '*', '/', '%', '^', '(', ')', ' ', '', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] and not isnumber(x):
+            variable = x
+            break
+    
+    if not variable:
+        raise ValueError(f"Function {func_exp} does not have a variable")
+
+    for x in expression:
+        if x not in ['+', '-', '*', '/', '%', '^', '(', ')', ' ', '', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] and not isnumber(x):
+            if variable != x:
+                raise ValueError(f"Function {func_exp} has multiple variables : {variable} != {x}   ")
+            
+    return variable
+
 def parser(tokens, context):
     def parse_expression():
         return parse_assignment()
@@ -61,33 +89,33 @@ def parser(tokens, context):
             return None
         return 
         raise ValueError(" NOT IMPLEMENTED QUESTION VALUE")
-        for i, token in enumerate(tokens):
-            if token[0] == 'QUESTION':
-                if i > 1 and tokens[i-1][0] == 'EQUAL' and tokens[i-2][0] == 'VARIABLE' or i > 4 and tokens[i-1][0] == 'EQUAL' and tokens[i-3][0] == 'RPAREN' and tokens[i-4][0] == 'VARIABLE' and tokens[i-5][0] == 'LPAREN' and tokens[i-5][0] == 'VARIABLE':
-                    variable_name = tokens[i-2][1]
-                    if variable_name in context:
-                        value = context[variable_name]
+        # for i, token in enumerate(tokens):
+        #     if token[0] == 'QUESTION':
+        #         if i > 1 and tokens[i-1][0] == 'EQUAL' and tokens[i-2][0] == 'VARIABLE' or i > 4 and tokens[i-1][0] == 'EQUAL' and tokens[i-3][0] == 'RPAREN' and tokens[i-4][0] == 'VARIABLE' and tokens[i-5][0] == 'LPAREN' and tokens[i-5][0] == 'VARIABLE':
+        #             variable_name = tokens[i-2][1]
+        #             if variable_name in context:
+        #                 value = context[variable_name]
 
-                        if isinstance(value, str):
-                            # Assuming the function is in the form of a string expression
-                            variables = [v.strip() for v in value.split() if v.strip().isalnum() and not v.strip().isdigit()]
-                            for var in variables:
-                                if var in context:
-                                    value = value.replace(var, str(context[var]))
-                            try:
-                                result = eval(value)
-                                return result
-                            except:
-                                return value  # If evaluation fails, return the original expression
-                        else:
-                            return value  # If it's not a string (function), return as is
+        #                 if isinstance(value, str):
+        #                     # Assuming the function is in the form of a string expression
+        #                     variables = [v.strip() for v in value.split() if v.strip().isalnum() and not v.strip().isdigit()]
+        #                     for var in variables:
+        #                         if var in context:
+        #                             value = value.replace(var, str(context[var]))
+        #                     try:
+        #                         result = eval(value)
+        #                         return result
+        #                     except:
+        #                         return value  # If evaluation fails, return the original expression
+        #                 else:
+        #                     return value  # If it's not a string (function), return as is
 
-                        return context[variable_name]
-                    else:
-                        raise ValueError(f"Variable '{variable_name}' not found")
-                else:
-                    raise ValueError("Question mark must follow a variable assignment (e.g., 'x = ?')")
-        return None  # If no question mark is found
+        #                 return context[variable_name]
+        #             else:
+        #                 raise ValueError(f"Variable '{variable_name}' not found")
+        #         else:
+        #             raise ValueError("Question mark must follow a variable assignment (e.g., 'x = ?')")
+        # return None  # If no question mark is found
 
     def parse_assignment():
         left = parse_addition()
@@ -150,19 +178,11 @@ def parser(tokens, context):
             expr = parse_function()  # Parse the inner expression
 
             if "=" not in expr:
-                print("tokens : ", tokens)
-                print("node : ", token)
-                print("expression : ", expr)
-                print(" token 1 : ", token[1])
-                exit()
-                # res = handle_function_operation(token[1])
-                return ASTNode('QUESTION', value=token[1])
-            
+                # function call with number. function(number)
 
 
 
-
-
+                return check_function_expression(token[1], expr)
 
             var_expr = expr.split("=")[0].strip().strip("()")
             expr = expr.split("=")[1].strip()
@@ -224,10 +244,81 @@ def parser(tokens, context):
         if not tokens:
             raise ValueError("Unexpected end of input")
         func_str = ""
-        parenthese = [False, False]
+        # parenthese = [False, False]
         for token in tokens:
             func_str += token[1] + " "
         return func_str
+
+    def check_function_expression(func_name, expr):
+        # get the function expression by  all operation
+        print("func_name : ", func_name)
+        print("expression : ", expr)
+  
+        # expr = re.split(r'([+\-*/^])', expr)
+        # expr = [token.strip() for token in expr if token.strip()]
+
+        parenthese = 0
+        value = []
+
+        for _ in range(len(tokens)):
+            token = tokens.pop(0)
+            print("token : ", token)
+            print(parenthese)
+
+            if token[0] == 'LPAREN':
+                parenthese += 1
+            elif parenthese == 0 and token[0] == 'RPAREN':
+                print("error : function without parenthesis")
+            elif token[0] == 'RPAREN' and parenthese:
+                parenthese -= 1
+                break
+            else:
+                value.append(token)
+        
+        print("value : ", value)
+
+        if context[func_name]:
+            variable = get_variable_name(context[func_name])
+            if value[0][0] == "NUMBER":
+                expression = context[func_name].replace(variable, value[0][1])
+
+
+                print(expression)
+            else:
+                raise ValueError(" the value for function must be a number != ", value)
+        else:
+            raise ValueError(" Function not defined")
+
+        rhs = lexer(expression)
+        rhs.append(tokens)
+        print("left  tokens : ", rhs)
+        print("end  : ", parser(rhs, context))
+        exit()
+
+        value = expr[0]
+
+        if "(" in value and ")" in value:
+            value2 = value.strip("()")
+
+            print("token : ", value2)    
+            if isnumber(value2):
+                print("is digit", value2)
+            else:
+                print("is not digit", value2)
+                exit()
+
+            return ASTNode('NUMBER', int(value2))
+        
+        print("expr : ", expr)
+        print("ALOHA")
+
+
+       
+        # get the variable and check if the function exist in context. then calculate the result to be returned
+        exit()
+        return
+
+
 
     def handle_function_operation(func_name):
         args = []
@@ -247,4 +338,3 @@ def parser(tokens, context):
         return ASTNode('NUMBER', result)
     ast = parse_expression()
     return ast
-

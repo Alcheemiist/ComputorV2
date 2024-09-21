@@ -204,16 +204,6 @@ class TestComputorv2(unittest.TestCase):
         self.assertEqual(self.computor("A(x) = 10 + x"), "10 + x")
 
 
-    def test_function_evaluation(self):
-        self.assertEqual(self.computor("A(x) = 2 * 4 + x"), "2 * 4 + x")
-        self.computor("B(x) = 4 -5 + (x + 2)^2 - 4")
-        # self.assertEqual(self.computor("A(2) + B(4)"), 41)
-        # self.assertEqual(self.computor("A(2) + B(4) + 2"), 43)
-        # self.assertEqual(self.computor("A(2) - B(4)"), -21)
-        # self.assertEqual(self.computor("A(2) * B(4)"), 310)
-        # self.assertEqual(self.computor("A(2) / B(4)"), 0.3225806451612903)
-        # self.assertEqual(self.computor("A(2) % B(4)"), 10)
-
     def test_question_mark(self):
         self.assertEqual(self.computor("2 + 3 ?"), 5)
         self.assertEqual(self.computor("10 - 4 ?"), 6)
@@ -229,11 +219,23 @@ class TestComputorv2(unittest.TestCase):
         # Test with functions
         self.computor("f(y) = y * 2 + 1")
         self.assertEqual(self.computor("f(3) = ?"), 7)
-        # self.assertEqual(self.computor("A(2) + B(4)"), 41)
         
         # Test with matrices
         self.computor("matA = [[1,2];[3,4]]")
         self.assertEqual(str(self.computor("matA + [[1,1];[1,1]] ?")), "[[2, 3], [4, 5]]")
+    
+    def test_function_evaluation(self):
+        self.assertEqual(self.computor("A(x) = 2 * 4 + x"), "2 * 4 + x")
+        self.computor("B(x) = 4 - 5 * x")
+        self.assertEqual(self.computor("A(2) + B(4)"), 41)
+        # self.assertEqual(self.computor("A(2) + B(4) + 2"), 43)
+        # self.assertEqual(self.computor("A(2) - B(4)"), -21)
+        # self.assertEqual(self.computor("A(2) * B(4)"), 310)
+        # self.assertEqual(self.computor("A(2) / B(4)"), 0.3225806451612903)
+        # self.assertEqual(self.computor("A(2) % B(4)"), 10)
+        # self.assertEqual(self.computor("A(2) + B(4)"), 41)
+
+
 
 if __name__ == '__main__':
     unittest.main()

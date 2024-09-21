@@ -163,7 +163,7 @@ def test_question_mark():
     print_color("OKBLUE", "----------------------------------")
 
 def test_function():
-    global context
+    global context2
 
     input = "funB(y) = 40 +  y"
     res = computorv2(input, DEBUG=True, Raise_flag=False)  
