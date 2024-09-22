@@ -144,13 +144,13 @@ def evaluator(ast, context, DEBUG=False):
             raise ValueError(f"Unknown matrix operator: {operator}")
 
     def handle_equation(node):
-        print("expression : ", context[node.function])
-        print("variable : ", get_variable_name(context[node.function]))
-        print(node.func_exp)
+        # print("expression : ", context[node.function])
+        # print("variable : ", get_variable_name(context[node.function]))
+        # print(node.func_exp)
         variable = get_variable_name(context[node.function])
         expression =  context[node.function].replace(variable, node.func_exp.strip())
 
-        print(" calculate : ",expression)
+        # print(" calculate : ",expression)
         tokens  = lexer(expression, DEBUG)
         ast     = parser(tokens, context)
         context_, result = evaluator(ast, context, DEBUG)

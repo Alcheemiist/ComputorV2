@@ -12,9 +12,6 @@ class TestComputorv2(unittest.TestCase):
     
     def  computor(self, user_input):
         return computorv2(user_input, Raise_flag=True)
-    
-    def tearDown(self):
-        pass
 
     def test_preliminary_checks(self):
         # Test natural integers
@@ -98,7 +95,6 @@ class TestComputorv2(unittest.TestCase):
     def test_error_handling(self):
         with self.assertRaises(ValueError):
             self.computor("5 / 0")
-        pass
 
     def test_case_insensitivity(self):
         self.computor("vara = 5")
@@ -227,15 +223,9 @@ class TestComputorv2(unittest.TestCase):
     def test_function_evaluation(self):
         self.assertEqual(self.computor("A(x) = 2 * 4 + x"), "2 * 4 + x")
         self.computor("B(x) = 4 - 5 * x")
-        self.assertEqual(self.computor("A(2) + B(4)"), 41)
-        # self.assertEqual(self.computor("A(2) + B(4) + 2"), 43)
-        # self.assertEqual(self.computor("A(2) - B(4)"), -21)
-        # self.assertEqual(self.computor("A(2) * B(4)"), 310)
-        # self.assertEqual(self.computor("A(2) / B(4)"), 0.3225806451612903)
-        # self.assertEqual(self.computor("A(2) % B(4)"), 10)
-        # self.assertEqual(self.computor("A(2) + B(4)"), 41)
+        self.assertEqual(self.computor("A(2) + B(4)"), -6)
+        self.assertEqual(self.computor("A(10) ?"), 18)
 
-
-
+        self.computor("C(3)")
 if __name__ == '__main__':
     unittest.main()

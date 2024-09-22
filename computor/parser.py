@@ -1,4 +1,3 @@
-import re
 from lexer import lexer
 
 class ASTNode:
@@ -75,6 +74,7 @@ def get_variable_name(func_exp):
     return variable
 
 def parser(tokens, context):
+    
     def parse_expression():
         return parse_assignment()
 
@@ -166,7 +166,6 @@ def parser(tokens, context):
                 number = float(token[1])
             else:
                 number = int(token[1])
-            
             return ASTNode('NUMBER', number)
         elif token[0] == 'COMPLEX':
             return ASTNode('COMPLEX', token[1])  # Directly create a complex node
@@ -179,10 +178,7 @@ def parser(tokens, context):
 
             if "=" not in expr:
                 # function call with number. function(number)
-
-
-
-                return check_function_expression(token[1], expr)
+                return parser(check_function_expression(token[1], expr), context)
 
             var_expr = expr.split("=")[0].strip().strip("()")
             expr = expr.split("=")[1].strip()
@@ -251,9 +247,8 @@ def parser(tokens, context):
 
     def check_function_expression(func_name, expr):
         # get the function expression by  all operation
-        print("func_name : ", func_name)
-        print("expression : ", expr)
-  
+        # print("func_name : ", func_name)
+        # print("expression : ", expr)
         # expr = re.split(r'([+\-*/^])', expr)
         # expr = [token.strip() for token in expr if token.strip()]
 
@@ -262,79 +257,44 @@ def parser(tokens, context):
 
         for _ in range(len(tokens)):
             token = tokens.pop(0)
-            print("token : ", token)
-            print(parenthese)
-
             if token[0] == 'LPAREN':
                 parenthese += 1
             elif parenthese == 0 and token[0] == 'RPAREN':
-                print("error : function without parenthesis")
+                raise ValueError("error : function without parenthesis")
             elif token[0] == 'RPAREN' and parenthese:
                 parenthese -= 1
                 break
             else:
                 value.append(token)
         
-        print("value : ", value)
-
         if context[func_name]:
             variable = get_variable_name(context[func_name])
             if value[0][0] == "NUMBER":
                 expression = context[func_name].replace(variable, value[0][1])
-
-
-                print(expression)
             else:
                 raise ValueError(" the value for function must be a number != ", value)
         else:
             raise ValueError(" Function not defined")
-
         rhs = lexer(expression)
-        rhs.append(tokens)
-        print("left  tokens : ", rhs)
-        print("end  : ", parser(rhs, context))
-        exit()
+        return rhs
 
-        value = expr[0]
-
-        if "(" in value and ")" in value:
-            value2 = value.strip("()")
-
-            print("token : ", value2)    
-            if isnumber(value2):
-                print("is digit", value2)
-            else:
-                print("is not digit", value2)
-                exit()
-
-            return ASTNode('NUMBER', int(value2))
+    # def handle_function_operation(func_name):
+    #     args = []
+    #     if tokens and tokens[0][0] == 'LPAREN':
+    #         tokens.pop(0)  # Consume '('
+    #         while tokens and tokens[0][0] != 'RPAREN':
+    #             if tokens[0][0] == 'COMMA':
+    #                 tokens.pop(0)  # Consume ','
+    #             args.append(parse_expression())
+    #         if not tokens or tokens.pop(0)[0] != 'RPAREN':
+    #             raise ValueError(f"Missing closing parenthesis for function {func_name}")
         
-        print("expr : ", expr)
-        print("ALOHA")
+    #     return args[0]
 
-
-       
-        # get the variable and check if the function exist in context. then calculate the result to be returned
-        exit()
-        return
-
-
-
-    def handle_function_operation(func_name):
-        args = []
-        if tokens and tokens[0][0] == 'LPAREN':
-            tokens.pop(0)  # Consume '('
-            while tokens and tokens[0][0] != 'RPAREN':
-                if tokens[0][0] == 'COMMA':
-                    tokens.pop(0)  # Consume ','
-                args.append(parse_expression())
-            if not tokens or tokens.pop(0)[0] != 'RPAREN':
-                raise ValueError(f"Missing closing parenthesis for function {func_name}")
-        
-        return args[0]
-
+# ---------------------------- #
     result = question_value()
     if result:
         return ASTNode('NUMBER', result)
     ast = parse_expression()
     return ast
+# ---------------------------- #
