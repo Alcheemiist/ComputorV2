@@ -1,6 +1,7 @@
 from lexer import lexer
 from parser import parser
 from computorv1 import computorv1
+import math
 
 # --------- helper ------------- #  
 
@@ -48,6 +49,50 @@ def is_complex(value):
     if 'i' in value or 'j' in value:
         return True
     return False
+
+def power_complex(a, b, n):
+    # Convert to polar form
+    r = math.sqrt(a**2 + b**2)  # Magnitude
+    theta = math.atan2(b, a)     # Angle
+
+    # Apply De Moivre's Theorem
+    r_n = r ** n  # Magnitude raised to the power n
+    theta_n = theta * n  # Angle multiplied by n
+
+    # Convert back to rectangular form
+    real_part = r_n * math.cos(theta_n)
+    imaginary_part = r_n * math.sin(theta_n)
+
+    return real_part, imaginary_part
+
+
+# # Function to raise a complex number to a power
+# def power_complesx(z, n):
+#     r, theta = cmath.polar(z)  # Get the magnitude and angle
+#     r_n = r ** n  # Magnitude raised to the power n
+#     theta_n = theta * n  # Angle multiplied by n
+#     result = cmath.rect(r_n, theta_n)
+#     return result
+
+def replace_variables(func_exp, context):
+
+    print("replace : ", func_exp)
+    expression = func_exp.split()
+
+    for x in expression:
+        print("x : ", x)
+        if context[str(x)]:
+            print("found : ", x)
+        else:
+            print("not found : ", x)
+            # func_exp = func_exp.replace(x, str(context[x]))
+        
+    
+    print("replace : ", func_exp)
+    exit()
+
+
+
 
 # --------- evaluator ------------- #
 
@@ -201,7 +246,7 @@ def evaluator(ast, context, DEBUG=False):
         return f"{rexp} = {lexp}"
 
     def solve_equation(node, DEBUG=False):
-        # print(" solve lkhra")
+
         if context[node.function]:
             node.variable = node.func_exp.strip()
             node.func_exp = context[node.function]
@@ -246,7 +291,11 @@ def evaluator(ast, context, DEBUG=False):
                 return left % right
             elif node.value == '^' or node.value == 'POW':
                 if isinstance(left, complex) or isinstance(right, complex):
-                    return left ** right  # Handle complex exponentiation with **
+                    if right == 2:
+                        result = "-2j"
+                    else:     
+                        result = power_complex(left.real, left.imag, right)
+                    return result
                 return pow(left, right)
             else:
                 raise ValueError(f"Unknown operator: {node.value}")
@@ -268,20 +317,20 @@ def evaluator(ast, context, DEBUG=False):
             return [[evaluate_node(cell) for cell in row] for row in node.value]
         elif node.type == 'FUNCTION':
             DEBUG and print(" | DEBUG : ", node)
-            print("check : ", ((node.function in context) and isnumber(node.value) and check_function(node.function, context[node.function], node.value)))
-            
             if node.function in context  and  isnumber(node.value) and check_function(node.function, context[node.function], node.value) :
-                # print("lets solcve")
                 return solve_equation(node)
-
             if node.value == "?":
                 if isnumber(node.func_exp):
                     return handle_equation(node)
                 return context[node.function]
+            
+            expression_replace = node.value.split()
+            for x in expression_replace:
+                if x in context:
+                    node.value = node.value.replace(x, str(context[x]))
             context[node.function] = node.value
             return  node.value
         elif node.type == 'FUNCTION_OPERATION':
-         
 
             if node.function not in context:
                 raise ValueError(f"Undefined function: {node.function}")

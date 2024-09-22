@@ -271,6 +271,8 @@ def parser(tokens, context):
             variable = get_variable_name(context[func_name])
             if value[0][0] == "NUMBER":
                 expression = context[func_name].replace(variable, value[0][1])
+            elif context[value[0][1]]:
+                expression = context[func_name].replace(variable, str(context[value[0][1]]))
             else:
                 raise ValueError(" the value for function must be a number != ", value)
         else:

@@ -4,15 +4,12 @@ from lexer import lexer
 from parser import parser
 from evaluator import evaluator
 from helpers import print_color, COLORS
-from test_case import test_function
 
 context = {}
 
 def computorv2(user_input="", DEBUG=False, Raise_flag=False):
     global context
     
-    # TO ADD : History of the commands and the results
-
     if user_input == "!all":
         if context:
             print_color("HEADER", "\n | <---  Variables and functions stored  --->") 
@@ -49,7 +46,7 @@ def main():
     DEBUG = sys.argv[1] if len(sys.argv) > 1 else False
     DEBUG = DEBUG == "--debug"
     Raise_flag = False
-    # history = []
+    History = []
     
     print_color("WARNING", "Basic Calculator (Type 'exit' , 'q' to quit)")
     print_color("WARNING", "Type '!all' to display all stored variables and functions.\n")
@@ -64,20 +61,31 @@ def main():
             break
         elif user_input == "!all":
             computorv2(user_input, DEBUG, Raise_flag)
+        elif user_input == "history":
+            for i in History:
+                print("input : ", i[0]    , " result :", i[1])
         else:
             DEBUG and print_color("OKBLUE" , "-------------------")
             DEBUG and print_color("HEADER", f" |  User input: '{user_input}'")
             DEBUG and print_color("OKBLUE" , "------------------")
             result = computorv2(user_input, DEBUG, Raise_flag)
+            History.append((user_input, result))
             if result is not None:
                 print_color("UNDERLINE", f" | = {result}")
             DEBUG and print_color("OKBLUE" , "-------------------")
         count += 1
 
+
+def test_scenario():
+    print_color("HEADER", "test1: " + str(computorv2(" f(x) = 2 * xi ", DEBUG=False)))
+    print_color("HEADER", "test1: " + str(computorv2(" f(2) = ?", DEBUG=False)))
+
 if __name__ == "__main__":
+
     main()
 
     # ------ Test ----- #
+    # test_scenario()
     # test_function()
     # test_question_mark()
     # test_case()

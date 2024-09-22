@@ -20,6 +20,7 @@ token_patterns = [
     ('ERROR_INVALID_OPERATOR', r'[^+\-*/%^=(),\[\];?\s\d\w]+'),
     ('NUMBER', r'\b\d+(\.\d*)?\b'),
     ('ERROR', r'\d+[a-zA-Z0-9]+'),
+    ('ERROR_NUMBER', r'\b\d+[+\-*/%^]+\b'),
     ('VARIABLE', r'[a-zA-Z][a-zA-Z0-9]*=?'),
     ('ADD', r'\+'),
     ('SUB', r'\-'),
