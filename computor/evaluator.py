@@ -16,7 +16,7 @@ def get_variable_name(func_exp):
     expression = func_exp.split()
 
     for x in expression:
-        if x not in ['+', '-', '*', '/', '%', '^', '(', ')', ' ', '', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] and not isnumber(x):
+        if x not in ['+', '-', '*', '/', '%', '^', '(', ')', ' ', '', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'i'] and not isnumber(x):
             variable = x
             break
     
@@ -24,7 +24,7 @@ def get_variable_name(func_exp):
         raise ValueError(f"Function {func_exp} does not have a variable")
 
     for x in expression:
-        if x not in ['+', '-', '*', '/', '%', '^', '(', ')', ' ', '', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] and not isnumber(x):
+        if x not in ['+', '-', '*', '/', '%', '^', '(', ')', ' ', '', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', "i"] and not isnumber(x):
             if variable != x:
                 raise ValueError(f"Function {func_exp} has multiple variables : {variable} != {x}   ")
             
@@ -155,9 +155,6 @@ def evaluator(ast, context, DEBUG=False):
         ast     = parser(tokens, context)
         context_, result = evaluator(ast, context, DEBUG)
         return result 
-        
-        exit()
-    
     
     def validate_function(node, DEBUG=False):
         if DEBUG:
@@ -179,7 +176,7 @@ def evaluator(ast, context, DEBUG=False):
                 continue
             else:
                 for n in token:
-                    if  n not in [node.variable,'0', '1', '2', '3', '4', '5', '6', '7','8','9']:
+                    if  n not in [node.variable,'0', '1', '2', '3', '4', '5', '6', '7','8','9', 'i']:
                         raise ValueError(f"Function {node.func_exp} has multiple variables {n} != {node.variable}")
 
                 rexp += token + " * X^0 "          
@@ -195,7 +192,7 @@ def evaluator(ast, context, DEBUG=False):
                     lexp += "1 * X^1 "
                 continue
             for n in token:
-                if  n not in [node.variable,'0', '1', '2', '3', '4', '5', '6', '7','8','9']:
+                if  n not in [node.variable,'0', '1', '2', '3', '4', '5', '6', '7','8','9', 'i']:
                     raise ValueError(f"Function {node.func_exp} has multiple variables {n} != {node.variable}")
 
             lexp += token + " * X^0 "   
@@ -204,11 +201,13 @@ def evaluator(ast, context, DEBUG=False):
         return f"{rexp} = {lexp}"
 
     def solve_equation(node, DEBUG=False):
+        # print(" solve lkhra")
         if context[node.function]:
             node.variable = node.func_exp.strip()
             node.func_exp = context[node.function]
         else:
             raise ValueError(f"Function {node.function} not defined") 
+        
         equation = validate_function(node)
         DEBUG and print(" | SOLVE : ", equation)
         return computorv1(equation)
@@ -269,8 +268,12 @@ def evaluator(ast, context, DEBUG=False):
             return [[evaluate_node(cell) for cell in row] for row in node.value]
         elif node.type == 'FUNCTION':
             DEBUG and print(" | DEBUG : ", node)
-            if node.function in context  and not isnumber(node.func_exp) and check_function(node.function, context[node.function], node.value) and is_resignement(node, context[node.function], DEBUG):
+            print("check : ", ((node.function in context) and isnumber(node.value) and check_function(node.function, context[node.function], node.value)))
+            
+            if node.function in context  and  isnumber(node.value) and check_function(node.function, context[node.function], node.value) :
+                # print("lets solcve")
                 return solve_equation(node)
+
             if node.value == "?":
                 if isnumber(node.func_exp):
                     return handle_equation(node)

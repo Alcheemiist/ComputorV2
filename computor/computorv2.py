@@ -74,11 +74,11 @@ def main():
             DEBUG and print_color("OKBLUE" , "-------------------")
         count += 1
 
-
-
 if __name__ == "__main__":
-    # main()
-    test_function()
+    main()
+
+    # ------ Test ----- #
+    # test_function()
     # test_question_mark()
     # test_case()
     # test_case_function()

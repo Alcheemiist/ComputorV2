@@ -67,7 +67,7 @@ def get_variable_name(func_exp):
         raise ValueError(f"Function {func_exp} does not have a variable")
 
     for x in expression:
-        if x not in ['+', '-', '*', '/', '%', '^', '(', ')', ' ', '', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] and not isnumber(x):
+        if x not in ['+', '-', '*', '/', '%', '^', '(', ')', ' ', '', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'i'] and not isnumber(x):
             if variable != x:
                 raise ValueError(f"Function {func_exp} has multiple variables : {variable} != {x}   ")
             

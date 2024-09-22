@@ -195,7 +195,7 @@ class TestComputorv2(unittest.TestCase):
     def test_equation_solving(self):
         self.computor("funD(x) = x + 1")
         self.computor("y = 0")
-        self.assertEqual(self.computor("funD(x) = 12"), "12")
+        self.assertEqual(self.computor("funD(x) = 12"), [11])
         self.computor("A(x) = x * 2 + 3 - x ^ 2 ")
         self.assertEqual(self.computor("A(x) = 10 + x"), "10 + x")
 
