@@ -6,16 +6,11 @@ from evaluator import evaluator
 from helpers import print_color, COLORS
 from test_case import test_function
 
-
 context = {}
-
-
-
-
 
 def computorv2(user_input="", DEBUG=False, Raise_flag=False):
     global context
-
+    
     # TO ADD : History of the commands and the results
 
     if user_input == "!all":

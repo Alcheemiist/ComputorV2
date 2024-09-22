@@ -225,7 +225,9 @@ class TestComputorv2(unittest.TestCase):
         self.computor("B(x) = 4 - 5 * x")
         self.assertEqual(self.computor("A(2) + B(4)"), -6)
         self.assertEqual(self.computor("A(10) ?"), 18)
+        with self.assertRaises(ValueError):
+            self.computor("C(3)")
 
-        self.computor("C(3)")
+
 if __name__ == '__main__':
     unittest.main()

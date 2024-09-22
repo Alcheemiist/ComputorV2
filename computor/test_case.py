@@ -2,7 +2,6 @@ from lexer import lexer
 from parser import parser
 from evaluator import evaluator
 from helpers import print_color
-from computorv2 import *
 
 # ---------------- # 
 
